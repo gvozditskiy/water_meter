@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+
+    <!--/////////custom colors-->
+    <color name="coldwater_last">#E1F5FE</color>
+    <color name="hotwater_last">#FFEBEE</color>
+    <color name="coldwater">#81D4FA</color>
+    <color name="hotwater">#EF9A9A</color>
+    <color name="stroke">#424242</color>
+</resources>
