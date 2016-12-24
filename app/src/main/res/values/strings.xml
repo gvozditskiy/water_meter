@@ -14,4 +14,20 @@
     <string name="frag_enter_ind_sendBtn_caption">Отправить показания</string>
     <string name="frag_enter_ind_summary">Суммарный расход за текущий период %d м3</string>
     <string name="frag_enter_ind_delta">+%d м3</string>
+
+    <!--///////////////frag_profile//////////////////-->
+    <string name="frag_prof_name_hint">Имя</string>
+    <string name="frag_prof_secname_hint">Фамилия</string>
+    <string name="frag_prof_otch_hint">Отчество</string>
+    <string name="frag_prof_user_caption">ФИО</string>
+    <string name="frag_prof_address_caption">Адрес</string>
+    <string name="frag_prof_street_hint">Улица</string>
+    <string name="frag_prof_building_hint">Дом</string>
+    <string name="frag_prof_flat_hint">Квартира</string>
+    <string name="frag_prof_tele_caption">Номер телефона для СМС</string>
+    <string name="frag_prof_tele_hint">Телефон в формате 375 ХХ ХХХХХХХ</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
