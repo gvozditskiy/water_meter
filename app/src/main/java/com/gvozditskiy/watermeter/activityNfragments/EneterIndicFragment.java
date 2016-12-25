@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.gvozditskiy.watermeter.Indication;
 import com.gvozditskiy.watermeter.R;
+import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
 import com.gvozditskiy.watermeter.database.DbSchema;
 import com.gvozditskiy.watermeter.database.IndicationCursorWrapper;
@@ -329,9 +330,9 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         boolean b = true;
         for (Indication ind : mIndList) {
             if (ind.getMonth() == mMonth) {
-                Toast.makeText(getContext(), "Запись уже добавлена", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), "Запись уже добавлена", Toast.LENGTH_SHORT).show();
                 b = false;
-                return;
+//                return;
             }
         }
 
@@ -341,5 +342,12 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
             mIndList.addAll(getIndicationsList(0));
             initInd();
         }
+
+        Toast.makeText(getContext(),
+                Utils.getMessageBody(
+                        getContext(),
+                        Integer.parseInt(curCold.getText().toString()),
+                        Integer.parseInt(curHot.getText().toString())),
+                Toast.LENGTH_LONG).show();
     }
 }

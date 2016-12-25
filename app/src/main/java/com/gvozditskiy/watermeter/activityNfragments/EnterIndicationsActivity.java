@@ -24,7 +24,9 @@ public class EnterIndicationsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, RegisterInterface {
 
     private final static String TAG_INDFRAG="EnterIndicFragment";
+    private final static String TAG_STATFRAG="StatisticsFragment";
     OnSendListener onSendListener;
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +35,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,19 +103,21 @@ public class EnterIndicationsActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_profile) {
             Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_statistics) {
+            StatisticsFragment fragment = new StatisticsFragment();
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.content_enter_indications, fragment, TAG_STATFRAG );
+            ft.addToBackStack(null);
+            ft.commit();
+            fab.hide();
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_info) {
 
         } else if (id == R.id.nav_send) {
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -124,5 +128,6 @@ public class EnterIndicationsActivity extends AppCompatActivity
     @Override
     public void onRegisterInterface(OnSendListener onSendListener) {
         this.onSendListener = onSendListener;
+        fab.show();
     }
 }

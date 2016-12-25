@@ -22,12 +22,29 @@
                 android:layout_margin="8dp"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/frag_prof_user_caption"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    tools:text="Имя плательщика" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/image_size"
+                        android:layout_height="@dimen/image_size"
+                        android:src="@drawable/ic_person"
+                        android:layout_marginLeft="8dp" />
+
+                    <TextView
+                        android:layout_marginLeft="@dimen/card_textview_marg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/frag_prof_user_caption"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Title"
+                        tools:text="@string/frag_prof_user_caption" />
+
+                </LinearLayout>
+
+
 
                 <View
                     style="@style/Divider"
@@ -44,7 +61,8 @@
                         android:id="@+id/frag_prof_secname"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_secname_hint" />
+                        android:hint="@string/frag_prof_secname_hint"
+                        android:inputType="textPersonName" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -55,7 +73,8 @@
                         android:id="@+id/frag_prof_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_name_hint" />
+                        android:hint="@string/frag_prof_name_hint"
+                        android:inputType="textPersonName" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -66,7 +85,8 @@
                         android:id="@+id/frag_prof_otch"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_otch_hint" />
+                        android:hint="@string/frag_prof_otch_hint"
+                        android:inputType="textPersonName" />
                 </android.support.design.widget.TextInputLayout>
 
             </LinearLayout>
@@ -83,12 +103,28 @@
                 android:layout_margin="8dp"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/frag_prof_address_caption"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    tools:text="Адрес" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/image_size"
+                        android:layout_height="@dimen/image_size"
+                        android:src="@drawable/ic_address"
+                        android:layout_marginLeft="8dp" />
+
+                    <TextView
+                        android:layout_marginLeft="@dimen/card_textview_marg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/frag_prof_address_caption"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Title"
+                        tools:text="Адрес" />
+
+                </LinearLayout>
+
 
                 <View
                     style="@style/Divider"
@@ -105,7 +141,8 @@
                         android:id="@+id/frag_prof_street"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_street_hint" />
+                        android:hint="@string/frag_prof_street_hint"
+                        android:inputType="textCapWords|textPostalAddress" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -116,7 +153,8 @@
                         android:id="@+id/frag_prof_building"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_building_hint" />
+                        android:hint="@string/frag_prof_building_hint"
+                        android:inputType="textPostalAddress|number" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -127,7 +165,8 @@
                         android:id="@+id/frag_prof_flat"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_flat_hint" />
+                        android:hint="@string/frag_prof_flat_hint"
+                        android:inputType="textPostalAddress|number" />
                 </android.support.design.widget.TextInputLayout>
 
             </LinearLayout>
@@ -136,7 +175,8 @@
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin">
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -144,11 +184,37 @@
                 android:layout_margin="8dp"
                 android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/frag_prof_tele_caption"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="@dimen/image_size"
+                        android:layout_height="@dimen/image_size"
+                        android:src="@drawable/ic_telephone"
+                        android:layout_marginLeft="8dp" />
+
+                    <TextView
+                        android:layout_marginLeft="@dimen/card_textview_marg"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="@string/frag_prof_tele_caption"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Title"
+                        tools:text="@string/frag_prof_tele_caption" />
+
+                    <ImageButton
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:id="@+id/frag_profile_info"
+                        android:src="@drawable/ic_info"
+                        android:background="@color/transparent"
+                        android:layout_gravity="right"
+                        android:cropToPadding="true"
+                        android:scaleType="centerCrop" />
+                </LinearLayout>
 
                 <View
                     style="@style/Divider"
@@ -165,7 +231,8 @@
                         android:id="@+id/frag_prof_tele"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/frag_prof_tele_hint" />
+                        android:hint="@string/frag_prof_tele_hint"
+                        android:inputType="phone" />
                 </android.support.design.widget.TextInputLayout>
 
             </LinearLayout>
