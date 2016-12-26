@@ -62,7 +62,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/frag_prof_secname_hint"
-                        android:inputType="textPersonName" />
+                        android:inputType="textCapWords|textPersonName" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -74,7 +74,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/frag_prof_name_hint"
-                        android:inputType="textPersonName" />
+                        android:inputType="textCapWords|textPersonName" />
                 </android.support.design.widget.TextInputLayout>
 
                 <android.support.design.widget.TextInputLayout
@@ -86,7 +86,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/frag_prof_otch_hint"
-                        android:inputType="textPersonName" />
+                        android:inputType="textCapWords|textPersonName" />
                 </android.support.design.widget.TextInputLayout>
 
             </LinearLayout>
@@ -132,7 +132,15 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="8dp" />
 
+                <android.support.v7.widget.AppCompatSpinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/streets"
+                    android:layout_marginTop="8dp"
+                    android:id="@+id/frag_prof_spinner"/>
+
                 <android.support.design.widget.TextInputLayout
+                    android:id="@+id/frag_prof_street_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp">

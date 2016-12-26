@@ -7,14 +7,17 @@ import android.os.Bundle;
 import android.preference.TwoStatePreference;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatSpinner;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +40,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     TextInputEditText flat;
     TextInputEditText telephone;
     ImageButton infoBtn;
+    AppCompatSpinner spinner;
+    TextInputLayout streetLayout;
 
     RegisterSaveInterface registerInterface;
 
@@ -82,6 +87,23 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         flat = (TextInputEditText) view.findViewById(R.id.frag_prof_flat);
         telephone = (TextInputEditText) view.findViewById(R.id.frag_prof_tele);
         infoBtn = (ImageButton) view.findViewById(R.id.frag_profile_info);
+        spinner = (AppCompatSpinner) view.findViewById(R.id.frag_prof_spinner);
+        streetLayout = (TextInputLayout) view.findViewById(R.id.frag_prof_street_layout);
+
+        streetLayout.setHint((String)spinner.getSelectedItem());
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String[] array = getResources().getStringArray(R.array.streets);
+                streetLayout.setHint(array[i]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         // Linkify the message
         String msg = getString(R.string.frag_prof_info_message);
@@ -110,6 +132,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             secName.setText(sp.getString(Utils.PREFS_PROFILE_SECNAME, ""));
             otch.setText(sp.getString(Utils.PREFS_PROFILE_OTCH, ""));
             street.setText(sp.getString(Utils.PREFS_PROFILE_STREET, ""));
+            spinner.setSelection(sp.getInt(Utils.PREFS_PROFILE_STREET_TYPE,0),true);
             building.setText(sp.getString(Utils.PREFS_PROFILE_BUILDING, ""));
             flat.setText(sp.getString(Utils.PREFS_PROFILE_FLAT, ""));
             telephone.setText(sp.getString(Utils.PREFS_PROFILE_TELE, ""));
@@ -121,6 +144,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             building.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_BUILDING, ""));
             flat.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_FLAT, ""));
             telephone.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_TELE, ""));
+            spinner.setSelection(savedInstanceState.getInt(Utils.PREFS_PROFILE_STREET_TYPE,0),true);
         }
     }
 
@@ -134,6 +158,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         outState.putString(Utils.PREFS_PROFILE_BUILDING, building.getText().toString());
         outState.putString(Utils.PREFS_PROFILE_FLAT, flat.getText().toString());
         outState.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ",""));
+        outState.putInt(Utils.PREFS_PROFILE_STREET_TYPE, spinner.getSelectedItemPosition());
     }
 
     private boolean checkFields() {
@@ -204,6 +229,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             editor.putString(Utils.PREFS_PROFILE_BUILDING, building.getText().toString());
             editor.putString(Utils.PREFS_PROFILE_FLAT, flat.getText().toString());
             editor.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ",""));
+            editor.putInt(Utils.PREFS_PROFILE_STREET_TYPE, spinner.getSelectedItemPosition());
             editor.commit();
             getActivity().finish();
 //            editor.apply();

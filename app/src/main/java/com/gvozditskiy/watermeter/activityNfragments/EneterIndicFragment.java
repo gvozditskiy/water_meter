@@ -1,17 +1,26 @@
 package com.gvozditskiy.watermeter.activityNfragments;
 
 
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
+import android.telephony.SmsManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -24,6 +33,7 @@ import com.gvozditskiy.watermeter.database.BaseHelper;
 import com.gvozditskiy.watermeter.database.DbSchema;
 import com.gvozditskiy.watermeter.database.IndicationCursorWrapper;
 import com.gvozditskiy.watermeter.interfaces.OnSendListener;
+import com.gvozditskiy.watermeter.interfaces.RegisterIntents;
 import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
 
 import java.util.ArrayList;
@@ -36,6 +46,7 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class EneterIndicFragment extends Fragment implements OnSendListener {
+    private static final String TAG_ADDFRAG = "AddDialogFragment";
     private AppCompatEditText curCold;
     private AppCompatEditText curHot;
     private AppCompatEditText lastCold;
@@ -54,6 +65,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     int mDay;
 
     private RegisterInterface registerInterface;
+    RegisterIntents registerIntents;
 
     List<Indication> mIndList;
 
@@ -75,7 +87,8 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         mDay = mCalendar.get(Calendar.DAY_OF_MONTH);
         mIndList = new ArrayList<>();
         mIndList.addAll(getIndicationsList(0));
-
+        setHasOptionsMenu(true);
+        getActivity().setTitle(getString(R.string.app_name));
 
     }
 
@@ -87,6 +100,8 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         } else {
             throw new ClassCastException("Activity should implements RegisterInterface");
         }
+
+        registerIntents = (RegisterIntents) context;
     }
 
     @Override
@@ -99,8 +114,8 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        curCold = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_current_coldwater);
-        curHot = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_current_hotwater);
+        curCold = (AppCompatEditText) view.findViewById(R.id.frag_add_coldwater);
+        curHot = (AppCompatEditText) view.findViewById(R.id.frag_add_hotwater);
         lastCold = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_last_coldwater);
         lastHot = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_last_hotwater);
         deltaColdTv = (TextView) view.findViewById(R.id.frag_enter_ind_coldDelta);
@@ -185,6 +200,24 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         initInd();
 
         registerInterface.onRegisterInterface(this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_enter_indications_frag, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_add_add:
+                FragmentManager fm = getChildFragmentManager();
+                AddDialogFragment fragment = new AddDialogFragment();
+                fragment.show(fm, TAG_ADDFRAG );
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void initInd() {
@@ -326,28 +359,87 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
      */
     @Override
     public void onSend() {
-        ContentValues contentValues = getContentValues();
+        final ContentValues contentValues = getContentValues();
         boolean b = true;
         for (Indication ind : mIndList) {
             if (ind.getMonth() == mMonth) {
-//                Toast.makeText(getContext(), "Запись уже добавлена", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Запись за текущий период уже добавлена", Toast.LENGTH_SHORT).show();
                 b = false;
 //                return;
             }
         }
 
         if (b) {
-            mDatabase.insert(DbSchema.IndTable.NAME, null, contentValues);
-            mIndList.clear();
-            mIndList.addAll(getIndicationsList(0));
-            initInd();
+            try {
+                new AlertDialog.Builder(getContext())
+                        .setTitle(getString(R.string.frag_enter_ind_title_warn))
+                        .setMessage(String.format(getString(R.string.frag_enter_ind_message_warn), Utils.getMessageBody(getContext(),
+                                Integer.parseInt(curCold.getText().toString()),
+                                Integer.parseInt(curHot.getText().toString()))))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mDatabase.insert(DbSchema.IndTable.NAME, null, contentValues);
+                                mIndList.clear();
+                                mIndList.addAll(getIndicationsList(0));
+                                initInd();
+
+                                sendSMS();
+                            }
+                        }).show();
+            } catch (Exception e ) {
+                Toast.makeText(getContext(), "Показания счетчиков не отправлены. Проверьте введенные данные", Toast.LENGTH_SHORT).show();
+            }
+
         }
 
-        Toast.makeText(getContext(),
-                Utils.getMessageBody(
-                        getContext(),
-                        Integer.parseInt(curCold.getText().toString()),
-                        Integer.parseInt(curHot.getText().toString())),
-                Toast.LENGTH_LONG).show();
+
+    }
+
+    private void sendSMS() {
+        String phoneNumber = "+" + Utils.getPhone(getContext());
+        String smsBody = Utils.getMessageBody(
+                getContext(),
+                Integer.parseInt(curCold.getText().toString()),
+                Integer.parseInt(curHot.getText().toString()));
+
+
+        String SMS_SENT = "SMS_SENT";
+        String SMS_DELIVERED = "SMS_DELIVERED";
+
+        PendingIntent sentPendingIntent = PendingIntent.getBroadcast(getContext(), 0, new Intent(SMS_SENT), 0);
+        PendingIntent deliveredPendingIntent = PendingIntent.getBroadcast(getContext(), 0, new Intent(SMS_DELIVERED), 0);
+
+        registerIntents.onRegisterIntent(sentPendingIntent, deliveredPendingIntent);
+
+        SmsManager smsManager = SmsManager.getDefault();
+        ArrayList<String> texts = smsManager.divideMessage(smsBody);
+        ArrayList<PendingIntent> sentPendingIntents = new ArrayList<PendingIntent>();
+        ArrayList<PendingIntent> deliveredPendingIntents = new ArrayList<PendingIntent>();
+
+        for (int i = 0; i < texts.size(); i++) {
+            sentPendingIntents.add(sentPendingIntent);
+            deliveredPendingIntents.add(deliveredPendingIntent);
+        }
+
+        if (!phoneNumber.equals("") && !smsBody.equals("")) {
+//            if (texts.size()==1) {
+//                smsManager.sendTextMessage(phoneNumber, null, smsBody, sentPendingIntent, deliveredPendingIntent);
+//            } else {
+//                smsManager.sendMultipartTextMessage(phoneNumber, null, texts, null, null);
+//            }
+            smsManager.sendMultipartTextMessage(phoneNumber, null, texts, sentPendingIntents, deliveredPendingIntents);
+
+        } else {
+            Toast.makeText(getContext(), "Показания счетчиков не отправлены. Проверьте введенные данные", Toast.LENGTH_SHORT).show();
+        }
+
+//        Toast.makeText(getContext(),
+//                Utils.getMessageBody(
+//                        getContext(),
+//                        Integer.parseInt(curCold.getText().toString()),
+//                        Integer.parseInt(curHot.getText().toString())),
+//                Toast.LENGTH_LONG).show();
     }
 }

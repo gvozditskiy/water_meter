@@ -5,17 +5,38 @@
     tools:context="com.gvozditskiy.watermeter.activityNfragments.StatisticsFragment"
     android:orientation="vertical">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="8dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/frag_stat_spinner_capt"/>
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/frag_stat_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/charts"/>
+
+    </LinearLayout>
+
+
+
     <com.db.chart.view.LineChartView
         android:layout_margin="8dp"
         android:id="@+id/frag_stat_linechart"
         android:layout_width="match_parent"
-        android:layout_height="200dp"/>
+        android:layout_height="match_parent"/>
 
     <com.db.chart.view.BarChartView
+        android:layout_margin="8dp"
         xmlns:chart="http://schemas.android.com/apk/res-auto"
         android:id="@+id/frag_stat_barchart"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="match_parent"
         chart:chart_setSpacing="24dp"
         chart:chart_barSpacing="48dp"/>
 

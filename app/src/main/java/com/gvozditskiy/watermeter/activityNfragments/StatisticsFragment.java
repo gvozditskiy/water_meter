@@ -5,10 +5,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatSpinner;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import com.db.chart.model.BarSet;
 import com.db.chart.model.LineSet;
@@ -25,7 +27,7 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class StatisticsFragment extends Fragment {
-
+AppCompatSpinner spinner;
 
     public StatisticsFragment() {
         // Required empty public constructor
@@ -36,12 +38,44 @@ public class StatisticsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        getActivity().setTitle(R.string.frag_stat_name);
         return inflater.inflate(R.layout.fragment_statistics, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        final LineChartView chartView = (LineChartView) view.findViewById(R.id.frag_stat_linechart);
+        final BarChartView bsrChartView = (BarChartView) view.findViewById(R.id.frag_stat_barchart);
+        chartView.setVisibility(View.GONE);
+        bsrChartView.setVisibility(View.GONE);
+        spinner = (AppCompatSpinner) view.findViewById(R.id.frag_stat_spinner);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i) {
+                    case 0:
+                        chartView.setVisibility(View.VISIBLE);
+                        bsrChartView.setVisibility(View.GONE);
+                        chartView.show();
+                        break;
+                    case 1:
+                        chartView.setVisibility(View.GONE);
+                        bsrChartView.setVisibility(View.VISIBLE);
+                        bsrChartView.show();
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        if (savedInstanceState!=null) {
+            spinner.setSelection(savedInstanceState.getInt("pos",0));
+        }
         List<Indication> list = new ArrayList<>();
         list.addAll(Utils.getIndicationsList(0, getContext()));
         Log.d("boom", String.valueOf(list.size()));
@@ -85,7 +119,7 @@ public class StatisticsFragment extends Fragment {
 
 
 
-        LineChartView chartView = (LineChartView) view.findViewById(R.id.frag_stat_linechart);
+
         coldSet.setColor(blueColor);
         coldSet.setDotsRadius(18);
         coldSet.setDotsColor(blueColor);
@@ -100,18 +134,31 @@ public class StatisticsFragment extends Fragment {
         chartView.addData(coldSet);
         chartView.addData(hotSet);
         chartView.addData(sumSet);
-        chartView.show();
+        if (spinner.getSelectedItemPosition()==0) {
+            chartView.show();
+            chartView.setVisibility(View.VISIBLE);
+            bsrChartView.setVisibility(View.GONE);
+        }
 
-        BarChartView bsrChartView = (BarChartView) view.findViewById(R.id.frag_stat_barchart);
         coldBarSet.setColor(blueColor);
         hotBarSet.setColor(redColor);
         sumBarSet.setColor(greenColor);
-        bsrChartView.setBarSpacing(300);
+        bsrChartView.setBarSpacing(100);
         bsrChartView.setSetSpacing(24);
         bsrChartView.addData(coldBarSet);
         bsrChartView.addData(hotBarSet);
         bsrChartView.addData(sumBarSet);
-        bsrChartView.show();
+        if (spinner.getSelectedItemPosition()==1) {
+            bsrChartView.show();
+            bsrChartView.setVisibility(View.VISIBLE);
+            chartView.setVisibility(View.GONE);
+        }
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("pos", spinner.getSelectedItemPosition());
     }
 }
