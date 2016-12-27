@@ -27,41 +27,42 @@
                 android:orientation="horizontal"
                 >
 
-                <RadioButton
-                    android:id="@+id/frag_prof_radiobtn1"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:button="@color/transparent"
-                    android:background="@drawable/flat_selector"
-                    android:layout_margin="8dp"
-                    android:checked="true"/>
+                <!--<RadioButton-->
+                    <!--android:id="@+id/frag_prof_radiobtn1"-->
+                    <!--android:layout_width="48dp"-->
+                    <!--android:layout_height="48dp"-->
+                    <!--android:button="@color/transparent"-->
+                    <!--android:background="@drawable/flat_selector"-->
+                    <!--android:layout_margin="8dp"-->
+                    <!--android:checked="true"/>-->
 
-                <RadioButton
-                    android:id="@+id/frag_prof_radiobtn2"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_margin="8dp"
-                    android:button="@color/transparent"
-                    android:background="@drawable/flat_selector" />
+                <!--<RadioButton-->
+                    <!--android:id="@+id/frag_prof_radiobtn2"-->
+                    <!--android:layout_width="48dp"-->
+                    <!--android:layout_height="48dp"-->
+                    <!--android:layout_margin="8dp"-->
+                    <!--android:button="@color/transparent"-->
+                    <!--android:background="@drawable/flat_selector" />-->
 
-                <RadioButton
-                    android:id="@+id/frag_prof_radiobtn3"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_margin="8dp"
-                    android:button="@color/transparent"
-                    android:background="@drawable/flat_selector" />
+                <!--<RadioButton-->
+                    <!--android:id="@+id/frag_prof_radiobtn3"-->
+                    <!--android:layout_width="48dp"-->
+                    <!--android:layout_height="48dp"-->
+                    <!--android:layout_margin="8dp"-->
+                    <!--android:button="@color/transparent"-->
+                    <!--android:background="@drawable/flat_selector" />-->
 
-                <RadioButton
-                    android:id="@+id/frag_prof_radiobtn4"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_margin="8dp"
-                    android:button="@color/transparent"
-                    android:background="@drawable/flat_selector"
-                    />
+                <!--<RadioButton-->
+                    <!--android:id="@+id/frag_prof_radiobtn4"-->
+                    <!--android:layout_width="48dp"-->
+                    <!--android:layout_height="48dp"-->
+                    <!--android:layout_margin="8dp"-->
+                    <!--android:button="@color/transparent"-->
+                    <!--android:background="@drawable/flat_selector"-->
+                    <!--/>-->
 
             </RadioGroup>
+
         </HorizontalScrollView>
     <ImageButton
         android:id="@+id/frag_prof_editbtn"
@@ -71,6 +72,12 @@
         android:background="@color/transparent"
         android:layout_gravity="end|center_vertical"/>
 </LinearLayout>
+
+        <TextView
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/frag_prof_flatname"/>
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"

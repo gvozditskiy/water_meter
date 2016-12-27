@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
@@ -21,6 +22,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +51,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     AppCompatSpinner spinner;
     TextInputLayout streetLayout;
     ImageButton flatEditBtn;
+    RadioGroup radioGroup;
+    TextView flatName;
     RegisterSaveInterface registerInterface;
 
     SharedPreferences sp;
@@ -95,6 +100,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         spinner = (AppCompatSpinner) view.findViewById(R.id.frag_prof_spinner);
         streetLayout = (TextInputLayout) view.findViewById(R.id.frag_prof_street_layout);
         flatEditBtn = (ImageButton) view.findViewById(R.id.frag_prof_editbtn);
+        radioGroup = (RadioGroup) view.findViewById(R.id.frag_prof_radiogroup);
+        flatName = (TextView) view.findViewById(R.id.frag_prof_flatname);
 
         streetLayout.setHint((String) spinner.getSelectedItem());
 
@@ -106,14 +113,24 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 fragment.setOnUpdateListener(new OnUpdate() {
                     @Override
                     public void onUpdate() {
-                        List<Flat> flatList = Utils.getFlatList(getContext());
-                        Log.d("flatlist size", String.valueOf(flatList.size()));
+                        setUpRadioGroup();
+
                     }
                 });
                 fragment.show(fm, "");
+                
+                //// TODO: 27.12.2016 переделать в обычный фрагмент 
             }
         });
 
+        setUpRadioGroup();
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
+            }
+        });
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -167,6 +184,29 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             flat.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_FLAT, ""));
             telephone.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_TELE, ""));
             spinner.setSelection(savedInstanceState.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0), true);
+        }
+    }
+
+    private void setUpRadioGroup() {
+        List<Flat> flatList = Utils.getFlatList(getContext());
+        int id = 0;
+        radioGroup.removeAllViews();
+        for (Flat flat : flatList) {
+            RadioButton rBtn = new RadioButton(getContext());
+            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(150,150);
+            params.setMargins(20,20,20,20);
+            rBtn.setLayoutParams(params);
+            rBtn.setId(id++);
+//                            rBtn.setText(flat.getName());
+            rBtn.setButtonDrawable(null);
+            rBtn.setBackground(getResources().getDrawable(R.drawable.flat_selector));
+            radioGroup.addView(rBtn);
+        }
+        radioGroup.check(0);
+        try {
+            flatName.setText(flatList.get(0).getName());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

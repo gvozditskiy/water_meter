@@ -21,8 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activityNfragments.ProfileActivity"
-            android:windowSoftInputMode="stateHidden"></activity>
+        <activity
+            android:name=".activityNfragments.ProfileActivity"
+            android:windowSoftInputMode="adjustNothing" />
 
     </application>
 
