@@ -4,29 +4,34 @@ package com.gvozditskiy.watermeter.activityNfragments;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.TwoStatePreference;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gvozditskiy.watermeter.Flat;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.interfaces.OnSaveListener;
-import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
+import com.gvozditskiy.watermeter.interfaces.OnUpdate;
 import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,7 +47,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     ImageButton infoBtn;
     AppCompatSpinner spinner;
     TextInputLayout streetLayout;
-
+    ImageButton flatEditBtn;
     RegisterSaveInterface registerInterface;
 
     SharedPreferences sp;
@@ -89,8 +94,25 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         infoBtn = (ImageButton) view.findViewById(R.id.frag_profile_info);
         spinner = (AppCompatSpinner) view.findViewById(R.id.frag_prof_spinner);
         streetLayout = (TextInputLayout) view.findViewById(R.id.frag_prof_street_layout);
+        flatEditBtn = (ImageButton) view.findViewById(R.id.frag_prof_editbtn);
 
-        streetLayout.setHint((String)spinner.getSelectedItem());
+        streetLayout.setHint((String) spinner.getSelectedItem());
+
+        flatEditBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FlatEditorFragment fragment = new FlatEditorFragment();
+                FragmentManager fm = getChildFragmentManager();
+                fragment.setOnUpdateListener(new OnUpdate() {
+                    @Override
+                    public void onUpdate() {
+                        List<Flat> flatList = Utils.getFlatList(getContext());
+                        Log.d("flatlist size", String.valueOf(flatList.size()));
+                    }
+                });
+                fragment.show(fm, "");
+            }
+        });
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -119,7 +141,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                         .create();
                 d.show();
                 Linkify.addLinks((TextView) d.findViewById(android.R.id.message), Linkify.ALL);
-                ((TextView)d.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+                ((TextView) d.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
             }
         });
 
@@ -127,12 +149,12 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
          * если savedState!=null, заполняем поля из Bundle
          * иначе данные берем из SharedPrefs
          */
-        if (savedInstanceState==null) {
+        if (savedInstanceState == null) {
             name.setText(sp.getString(Utils.PREFS_PROFILE_NAME, ""));
             secName.setText(sp.getString(Utils.PREFS_PROFILE_SECNAME, ""));
             otch.setText(sp.getString(Utils.PREFS_PROFILE_OTCH, ""));
             street.setText(sp.getString(Utils.PREFS_PROFILE_STREET, ""));
-            spinner.setSelection(sp.getInt(Utils.PREFS_PROFILE_STREET_TYPE,0),true);
+            spinner.setSelection(sp.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0), true);
             building.setText(sp.getString(Utils.PREFS_PROFILE_BUILDING, ""));
             flat.setText(sp.getString(Utils.PREFS_PROFILE_FLAT, ""));
             telephone.setText(sp.getString(Utils.PREFS_PROFILE_TELE, ""));
@@ -144,7 +166,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             building.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_BUILDING, ""));
             flat.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_FLAT, ""));
             telephone.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_TELE, ""));
-            spinner.setSelection(savedInstanceState.getInt(Utils.PREFS_PROFILE_STREET_TYPE,0),true);
+            spinner.setSelection(savedInstanceState.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0), true);
         }
     }
 
@@ -157,7 +179,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         outState.putString(Utils.PREFS_PROFILE_STREET, street.getText().toString());
         outState.putString(Utils.PREFS_PROFILE_BUILDING, building.getText().toString());
         outState.putString(Utils.PREFS_PROFILE_FLAT, flat.getText().toString());
-        outState.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ",""));
+        outState.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ", ""));
         outState.putInt(Utils.PREFS_PROFILE_STREET_TYPE, spinner.getSelectedItemPosition());
     }
 
@@ -167,7 +189,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         if (secName.getText().toString().equals("")) {
             secName.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_nosecname_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
 
         }
@@ -175,42 +197,42 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         if (name.getText().toString().equals("")) {
             name.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_noname_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
         }
 
         if (otch.getText().toString().equals("")) {
             otch.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_nootch_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
 
         }
         if (street.getText().toString().equals("")) {
             street.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_nostreet_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
 
         }
         if (building.getText().toString().equals("")) {
             building.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_nobuilding_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
 
         }
         if (flat.getText().toString().equals("")) {
             flat.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_noflat_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
 
         }
         if (telephone.getText().toString().equals("")) {
             telephone.requestFocus();
             Toast.makeText(getContext(), getString(R.string.frag_prof_notelephone_message), Toast.LENGTH_SHORT).show();
-            b=false;
+            b = false;
             return false;
 
         }
@@ -228,7 +250,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             editor.putString(Utils.PREFS_PROFILE_STREET, street.getText().toString());
             editor.putString(Utils.PREFS_PROFILE_BUILDING, building.getText().toString());
             editor.putString(Utils.PREFS_PROFILE_FLAT, flat.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ",""));
+            editor.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ", ""));
             editor.putInt(Utils.PREFS_PROFILE_STREET_TYPE, spinner.getSelectedItemPosition());
             editor.commit();
             getActivity().finish();

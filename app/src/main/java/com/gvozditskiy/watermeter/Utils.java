@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.gvozditskiy.watermeter.database.BaseHelper;
 import com.gvozditskiy.watermeter.database.DbSchema;
+import com.gvozditskiy.watermeter.database.FlatCursorWrapper;
 import com.gvozditskiy.watermeter.database.IndicationCursorWrapper;
 
 import java.util.ArrayList;
@@ -100,6 +101,20 @@ public class Utils {
         return new IndicationCursorWrapper(cursor);
     }
 
+    private static FlatCursorWrapper queryFlat(Context context, String whereClaus, String[] whereArgs) {
+        mDatabase = new BaseHelper(context).getWritableDatabase();
+        Cursor cursor = mDatabase.query(
+                DbSchema.FlatsTable.NAME,
+                null,
+                whereClaus,
+                whereArgs,
+                null,
+                null,
+                null
+        );
+        return new FlatCursorWrapper(cursor);
+    }
+
     /**
      * Возвращает список индикаций за год
      *
@@ -140,5 +155,25 @@ public class Utils {
 
 
         return indList;
+    }
+
+    /**
+     * возвращает список квартир
+     * @param context
+     * @return
+     */
+    public static List<Flat> getFlatList(Context context) {
+        List<Flat> flats = new ArrayList<>();
+        FlatCursorWrapper cursor = queryFlat(context, null, null);
+        cursor.moveToFirst();
+        try {
+            while (!cursor.isAfterLast()) {
+                flats.add(cursor.getFlat());
+                cursor.moveToNext();
+            }
+        }finally {
+            cursor.close();
+        }
+        return flats;
     }
 }

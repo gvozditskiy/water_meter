@@ -29,4 +29,13 @@ public class DbSchema {
             public static final String HOT = "hot";
         }
     }
+
+    public  static final class FlatsTable {
+        public static final String NAME = "flats";
+
+        public static class Cols {
+            public static final String NAME = "name";
+            public static final String UUID = "flat_uuid";
+        }
+    }
 }
