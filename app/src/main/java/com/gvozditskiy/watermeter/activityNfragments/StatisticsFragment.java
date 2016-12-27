@@ -50,19 +50,24 @@ AppCompatSpinner spinner;
         chartView.setVisibility(View.GONE);
         bsrChartView.setVisibility(View.GONE);
         spinner = (AppCompatSpinner) view.findViewById(R.id.frag_stat_spinner);
+        try {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 switch (i) {
                     case 0:
-                        chartView.setVisibility(View.VISIBLE);
-                        bsrChartView.setVisibility(View.GONE);
-                        chartView.show();
+                        if (Utils.getIndicationsList(0, getContext()).size()>1) {
+                            chartView.setVisibility(View.VISIBLE);
+                            bsrChartView.setVisibility(View.GONE);
+                            chartView.show();
+                        }
                         break;
                     case 1:
-                        chartView.setVisibility(View.GONE);
-                        bsrChartView.setVisibility(View.VISIBLE);
-                        bsrChartView.show();
+                        if (Utils.getIndicationsList(0, getContext()).size()>1) {
+                            chartView.setVisibility(View.GONE);
+                            bsrChartView.setVisibility(View.VISIBLE);
+                            bsrChartView.show();
+                        }
                         break;
                 }
 
@@ -75,6 +80,9 @@ AppCompatSpinner spinner;
         });
         if (savedInstanceState!=null) {
             spinner.setSelection(savedInstanceState.getInt("pos",0));
+        }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         List<Indication> list = new ArrayList<>();
         list.addAll(Utils.getIndicationsList(0, getContext()));
@@ -118,40 +126,42 @@ AppCompatSpinner spinner;
         int redColorA = Color.argb(50, 239, 154, 154);
 
 
-
-
-        coldSet.setColor(blueColor);
-        coldSet.setDotsRadius(18);
-        coldSet.setDotsColor(blueColor);
-        hotSet.setDotsColor(redColor);
-        sumSet.setDotsColor(greenColor);
-        hotSet.setDotsRadius(18);
-        sumSet.setDotsRadius(18);
-        hotSet.setColor(redColor);
-        sumSet.setColor(greenColor);
-        hotSet.setFill(redColorA);
-        coldSet.setFill(blueColorA);
-        chartView.addData(coldSet);
-        chartView.addData(hotSet);
-        chartView.addData(sumSet);
-        if (spinner.getSelectedItemPosition()==0) {
-            chartView.show();
-            chartView.setVisibility(View.VISIBLE);
-            bsrChartView.setVisibility(View.GONE);
+        if (list.size()>1) {
+            coldSet.setColor(blueColor);
+            coldSet.setDotsRadius(18);
+            coldSet.setDotsColor(blueColor);
+            hotSet.setDotsColor(redColor);
+            sumSet.setDotsColor(greenColor);
+            hotSet.setDotsRadius(18);
+            sumSet.setDotsRadius(18);
+            hotSet.setColor(redColor);
+            sumSet.setColor(greenColor);
+            hotSet.setFill(redColorA);
+            coldSet.setFill(blueColorA);
+            chartView.addData(coldSet);
+            chartView.addData(hotSet);
+            chartView.addData(sumSet);
+            if (spinner.getSelectedItemPosition()==0) {
+                chartView.show();
+                chartView.setVisibility(View.VISIBLE);
+                bsrChartView.setVisibility(View.GONE);
+            }
         }
 
-        coldBarSet.setColor(blueColor);
-        hotBarSet.setColor(redColor);
-        sumBarSet.setColor(greenColor);
-        bsrChartView.setBarSpacing(100);
-        bsrChartView.setSetSpacing(24);
-        bsrChartView.addData(coldBarSet);
-        bsrChartView.addData(hotBarSet);
-        bsrChartView.addData(sumBarSet);
-        if (spinner.getSelectedItemPosition()==1) {
-            bsrChartView.show();
-            bsrChartView.setVisibility(View.VISIBLE);
-            chartView.setVisibility(View.GONE);
+        if (list.size()>1) {
+            coldBarSet.setColor(blueColor);
+            hotBarSet.setColor(redColor);
+            sumBarSet.setColor(greenColor);
+            bsrChartView.setBarSpacing(100);
+            bsrChartView.setSetSpacing(24);
+            bsrChartView.addData(coldBarSet);
+            bsrChartView.addData(hotBarSet);
+            bsrChartView.addData(sumBarSet);
+            if (spinner.getSelectedItemPosition()==1) {
+                bsrChartView.show();
+                bsrChartView.setVisibility(View.VISIBLE);
+                chartView.setVisibility(View.GONE);
+            }
         }
 
     }

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "38808449942-klmvqrcg7g888kl1d330olmsar9rqo46.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gvozditskiy.watermeter",
+            "certificate_hash": "867D8648B6C8A4918FBEB1946F67F0D7CA396948"
+          }
+        },
+        {
           "client_id": "38808449942-mdbp5ea3l3ua67fohvbc0q5fd3v2njrn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -29,7 +37,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBtz9YWpRqWF9kuto_Q_B7syaF3CuhZO2U"
+          "current_key": "AIzaSyCJIVmElOxZC_ocDNK-ac89m8m1sS6yJSk"
         }
       ],
       "services": {
