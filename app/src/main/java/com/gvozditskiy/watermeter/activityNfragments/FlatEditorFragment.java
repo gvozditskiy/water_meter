@@ -7,14 +7,15 @@ import android.content.DialogInterface;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.gvozditskiy.watermeter.Flat;
@@ -100,10 +100,11 @@ public class FlatEditorFragment extends DialogFragment {
                     }
                 })
                 .create();
-//        dialog.getWindow().setSoftInputMode(
-//                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
         dialog.show();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
 
         return dialog;
     }
@@ -189,18 +190,45 @@ public class FlatEditorFragment extends DialogFragment {
         }
 
         @Override
-        public void onBindViewHolder(final VH holder, final int i) {
+        public void onBindViewHolder(final VH holder, final int pos) {
             holder.btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (i == 0) {
+                    if (pos == 0) {
                         Toast.makeText(mContext, "Нельзя удалить основную квартиру", Toast.LENGTH_SHORT).show();
                     } else {
-                        onClickInterface.onClick(i);
+                        onClickInterface.onClick(pos);
                     }
                 }
             });
-            holder.name.setText(flats.get(i).getName());
+            holder.name.setText(flats.get(pos).getName());
+            holder.name.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean b) {
+                    if (b) {
+                        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                    } else {
+                        imm.hideSoftInputFromInputMethod(view.getWindowToken(),0);
+
+                    }
+                }
+            });
+            holder.name.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    flats.get(pos).setName(charSequence.toString());
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            });
         }
 
         @Override
