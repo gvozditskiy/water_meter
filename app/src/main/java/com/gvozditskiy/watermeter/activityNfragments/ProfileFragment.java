@@ -30,15 +30,20 @@ import com.gvozditskiy.watermeter.ColdRecyclerAdapter;
 import com.gvozditskiy.watermeter.Flat;
 import com.gvozditskiy.watermeter.HotRecyclerAdapter;
 import com.gvozditskiy.watermeter.Meter;
+import com.gvozditskiy.watermeter.Person;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.interfaces.OnSaveListener;
 import com.gvozditskiy.watermeter.interfaces.OnUpdate;
 import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -64,9 +69,12 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     RegisterSaveInterface registerInterface;
 
     SharedPreferences sp;
-    final List<Meter> coldMeterList = new ArrayList<>();
-    final List<Meter> hotMeterList = new ArrayList<>();
-    final List<Map<String, Object>> savedPage = new ArrayList<>();
+
+    //объекты, привязанные к квартире
+    private Person person;
+    private final List<Meter> coldMeterList = new ArrayList<>();
+    private final List<Meter> hotMeterList = new ArrayList<>();
+    private final List<Map> savedPage = new ArrayList<>();
 
     final ColdRecyclerAdapter coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
     final HotRecyclerAdapter hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
@@ -82,6 +90,11 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         sp = getActivity().getSharedPreferences(Utils.PREFS_PROFILE, Context.MODE_PRIVATE);
         coldAdapter.setContext(getContext());
         hotAdapter.setContext(getContext());
+
+        if (savedInstanceState!=null) {
+            savedPage.addAll((List<Map>) savedInstanceState.getSerializable("savePage"));
+            getContext();
+        }
     }
 
     @Override
@@ -105,23 +118,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        name = (TextInputEditText) view.findViewById(R.id.frag_prof_name);
-        secName = (TextInputEditText) view.findViewById(R.id.frag_prof_secname);
-        otch = (TextInputEditText) view.findViewById(R.id.frag_prof_otch);
-        street = (TextInputEditText) view.findViewById(R.id.frag_prof_street);
-        building = (TextInputEditText) view.findViewById(R.id.frag_prof_building);
-        flat = (TextInputEditText) view.findViewById(R.id.frag_prof_flat);
-        telephone = (TextInputEditText) view.findViewById(R.id.frag_prof_tele);
-        infoBtn = (ImageButton) view.findViewById(R.id.frag_profile_info);
-        spinner = (AppCompatSpinner) view.findViewById(R.id.frag_prof_spinner);
-        streetLayout = (TextInputLayout) view.findViewById(R.id.frag_prof_street_layout);
-        flatEditBtn = (ImageButton) view.findViewById(R.id.frag_prof_editbtn);
-        radioGroup = (RadioGroup) view.findViewById(R.id.frag_prof_radiogroup);
-        flatName = (TextView) view.findViewById(R.id.frag_prof_flatname);
-        coldRecycler = (RecyclerView) view.findViewById(R.id.frag_prof_recycler_cold);
-        hotRecycler = (RecyclerView) view.findViewById(R.id.frag_prof_recycler_hot);
-        addCold = (ImageButton) view.findViewById(R.id.frag_prof_addCold);
-        addHot = (ImageButton) view.findViewById(R.id.frag_prof_addHot);
+        //инициализация Views
+        initViews(view);
 
         streetLayout.setHint((String) spinner.getSelectedItem());
 
@@ -144,8 +142,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         });
 
         setUpRadioGroup();
-        initColdRecycler();
-        initHotRecycler();
+        initColdRecycler(savedInstanceState);
+        initHotRecycler(savedInstanceState);
 
         addCold.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,14 +167,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             }
         });
 
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if (i != -1) {
-                    flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
-                }
-            }
-        });
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -190,23 +181,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             }
         });
 
-        // Linkify the message
-        String msg = getString(R.string.frag_prof_info_message);
-        final SpannableString s = new SpannableString(msg);
-        Linkify.addLinks(s, Linkify.ALL);
-        infoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog d = new AlertDialog.Builder(getContext())
-                        .setTitle(getString(R.string.frag_prof_info_title))
-                        .setMessage(s)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .create();
-                d.show();
-                Linkify.addLinks((TextView) d.findViewById(android.R.id.message), Linkify.ALL);
-                ((TextView) d.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
-            }
-        });
+        //
+        setupInfoDialog();
+
 
         /**
          * если savedState!=null, заполняем поля из Bundle
@@ -233,6 +210,53 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         }
     }
 
+    /**
+     * Задает onClickListener для infoBtn, создает AlertDialog
+     */
+    private void setupInfoDialog() {
+        // Linkify the message
+        String msg = getString(R.string.frag_prof_info_message);
+        final SpannableString s = new SpannableString(msg);
+        Linkify.addLinks(s, Linkify.ALL);
+        infoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog d = new AlertDialog.Builder(getContext())
+                        .setTitle(getString(R.string.frag_prof_info_title))
+                        .setMessage(s)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .create();
+                d.show();
+                Linkify.addLinks((TextView) d.findViewById(android.R.id.message), Linkify.ALL);
+                ((TextView) d.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+            }
+        });
+    }
+
+    /**
+     * Инициализирует все view (view.findViewById() )
+     * @param view View корневого лэйаута
+     */
+    private void initViews(View view) {
+        name = (TextInputEditText) view.findViewById(R.id.frag_prof_name);
+        secName = (TextInputEditText) view.findViewById(R.id.frag_prof_secname);
+        otch = (TextInputEditText) view.findViewById(R.id.frag_prof_otch);
+        street = (TextInputEditText) view.findViewById(R.id.frag_prof_street);
+        building = (TextInputEditText) view.findViewById(R.id.frag_prof_building);
+        flat = (TextInputEditText) view.findViewById(R.id.frag_prof_flat);
+        telephone = (TextInputEditText) view.findViewById(R.id.frag_prof_tele);
+        infoBtn = (ImageButton) view.findViewById(R.id.frag_profile_info);
+        spinner = (AppCompatSpinner) view.findViewById(R.id.frag_prof_spinner);
+        streetLayout = (TextInputLayout) view.findViewById(R.id.frag_prof_street_layout);
+        flatEditBtn = (ImageButton) view.findViewById(R.id.frag_prof_editbtn);
+        radioGroup = (RadioGroup) view.findViewById(R.id.frag_prof_radiogroup);
+        flatName = (TextView) view.findViewById(R.id.frag_prof_flatname);
+        coldRecycler = (RecyclerView) view.findViewById(R.id.frag_prof_recycler_cold);
+        hotRecycler = (RecyclerView) view.findViewById(R.id.frag_prof_recycler_hot);
+        addCold = (ImageButton) view.findViewById(R.id.frag_prof_addCold);
+        addHot = (ImageButton) view.findViewById(R.id.frag_prof_addHot);
+    }
+
     private void setUpRadioGroup() {
         final List<Flat> flatList = Utils.getFlatList(getContext());
         int id = 0;
@@ -253,8 +277,56 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                if (i != -1) {
+                    flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
+                }
+
+                saveFlatState();
+
+
+            }
+        });
+
         radioGroup.clearCheck();
         radioGroup.check(0);
+    }
+
+    private void saveFlatState() {
+        /**
+         * сохранение состояния квартиры
+         */
+        //person
+        person = new Person();
+        person.setName(name.getText().toString());
+        person.setSurname(secName.getText().toString());
+        person.setPatronymic( otch.getText().toString());
+        person.setStreet( street.getText().toString());
+        person.setBuilding( building.getText().toString());
+        person.setFlat( flat.getText().toString());
+        person.setPhone( telephone.getText().toString().replace(" ", ""));
+        person.setsType(String.valueOf(spinner.getSelectedItem()));
+
+        Map<String, Object> saveMap = new HashMap<>();
+        saveMap.put("cold", coldMeterList);
+        saveMap.put("hot", hotMeterList);
+        saveMap.put("person", person.personToMap());
+
+        try {
+            savedPage.remove(radioGroup.getCheckedRadioButtonId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            
+            savedPage.add(radioGroup.getCheckedRadioButtonId(), saveMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -268,6 +340,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         outState.putString(Utils.PREFS_PROFILE_FLAT, flat.getText().toString());
         outState.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ", ""));
         outState.putInt(Utils.PREFS_PROFILE_STREET_TYPE, spinner.getSelectedItemPosition());
+
+        saveFlatState();
+        outState.putSerializable("savePage", (Serializable) savedPage);
     }
 
     private boolean checkFields() {
@@ -326,8 +401,14 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         return b;
     }
 
-    private void initColdRecycler() {
-        coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, "g"));
+    private void initColdRecycler(Bundle savedState) {
+        if (savedState!=null) {
+            // TODO: 29.12.2016 куда потерялись индикаторы? 
+            List<Meter> savedColdList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("cold");
+            coldMeterList.addAll(savedColdList);
+        } else {
+            coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, "g"));
+        }
 //        coldMeterList.add(new Meter("ХВ2", Meter.TYPE_COLD, "ghh"));
         coldAdapter.setOnClickInterface(new ColdRecyclerAdapter.OnClickInterface() {
             @Override
@@ -343,8 +424,14 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
 
     }
 
-    private void initHotRecycler() {
-        hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, "g"));
+    private void initHotRecycler(Bundle savedState) {
+        if (savedState!=null) {
+            List<Meter> savedHotList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("hot");
+
+            hotMeterList.addAll(savedHotList);
+        } else {
+            hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, "g"));
+        }
 //        hotMeterList.add(new Meter("ГВ2", Meter.TYPE_HOT, "ghh"));
 //        hotMeterList.add(new Meter("ГВ3", Meter.TYPE_HOT, "ghh"));
         hotAdapter.setOnClickInterface(new HotRecyclerAdapter.OnClickHotInterface() {

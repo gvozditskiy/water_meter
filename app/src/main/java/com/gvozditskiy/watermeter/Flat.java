@@ -1,5 +1,6 @@
 package com.gvozditskiy.watermeter;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,7 +9,7 @@ import java.util.UUID;
  * Created by Alexey on 27.12.2016.
  */
 
-public class Flat {
+public class Flat implements Serializable {
     String name;
     UUID uuid;
 

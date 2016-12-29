@@ -23,7 +23,7 @@
         </activity>
         <activity
             android:name=".activityNfragments.ProfileActivity"
-            android:windowSoftInputMode="adjustNothing" />
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 

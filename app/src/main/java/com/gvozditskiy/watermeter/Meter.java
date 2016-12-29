@@ -1,5 +1,6 @@
 package com.gvozditskiy.watermeter;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,7 +9,7 @@ import java.util.UUID;
  * Created by Alexey on 28.12.2016.
  */
 
-public class Meter {
+public class Meter implements Serializable{
     public static final String TYPE_COLD="cold";
     public static final String TYPE_HOT="hot";
     private String name;

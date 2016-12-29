@@ -1,5 +1,6 @@
 package com.gvozditskiy.watermeter;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,12 @@ import java.util.Map;
  * Created by Alexey on 29.12.2016.
  */
 
-public class Person {
+public class Person implements Serializable {
+    public static final String STYPE_UL = "Улица";
+    public static final String STYPE_PRKT = "Проспект";
+    public static final String STYPE_PRLK = "Переулок";
+    public static final String STYPE_PRZD = "Проезд";
+    public static final String STYPE_BLVR = "Бульвар";
     String surname;
     String name;
     String patronymic;
@@ -17,11 +23,12 @@ public class Person {
     String flat;
 
     String phone;
+    String sType;
 
     public Person() {
     }
 
-    public Person(String surname, String name, String patronymic, String street, String building, String flat, String phone) {
+    public Person(String surname, String name, String patronymic, String street, String building, String flat, String phone, String sType) {
         this.surname = surname;
         this.name = name;
         this.patronymic = patronymic;
@@ -29,6 +36,7 @@ public class Person {
         this.building = building;
         this.flat = flat;
         this.phone = phone;
+        this.sType = sType;
     }
 
     public  Map<String, String> personToMap() {
@@ -40,6 +48,7 @@ public class Person {
         personMap.put("building", this.building);
         personMap.put("flat", this.flat);
         personMap.put("phone", this.phone);
+        personMap.put("sType", this.sType);
         return personMap;
     }
 
@@ -52,6 +61,7 @@ public class Person {
         person.setBuilding(map.get("building"));
         person.setFlat(map.get("flat"));
         person.setPhone(map.get("phone"));
+        person.setsType(map.get("sType"));
         return person;
     }
 
@@ -109,5 +119,13 @@ public class Person {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getsType() {
+        return sType;
+    }
+
+    public void setsType(String sType) {
+        this.sType = sType;
     }
 }
