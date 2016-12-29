@@ -38,6 +38,7 @@ import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -65,6 +66,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     SharedPreferences sp;
     final List<Meter> coldMeterList = new ArrayList<>();
     final List<Meter> hotMeterList = new ArrayList<>();
+    final List<Map<String, Object>> savedPage = new ArrayList<>();
 
     final ColdRecyclerAdapter coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
     final HotRecyclerAdapter hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
@@ -331,7 +333,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             @Override
             public void onClick(int i) {
                 coldMeterList.remove(i);
+//                coldAdapter.notifyDataSetChanged();
                 coldAdapter.notifyItemRemoved(i);
+                coldAdapter.notifyItemRangeChanged(i, coldMeterList.size()-i);
             }
         });
         coldRecycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -348,12 +352,16 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             public void onClick(int i) {
                 hotMeterList.remove(i);
                 hotAdapter.notifyItemRemoved(i);
+                hotAdapter.notifyItemRangeChanged(i, hotMeterList.size()-i);
+
             }
         });
         hotRecycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         hotRecycler.setAdapter(hotAdapter);
 
     }
+
+
 
     @Override
     public void onSave() {

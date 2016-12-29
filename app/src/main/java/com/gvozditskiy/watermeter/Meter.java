@@ -1,5 +1,7 @@
 package com.gvozditskiy.watermeter;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -14,12 +16,33 @@ public class Meter {
     private String flatUUID;
     private UUID uuid;
 
+    public Meter() {}
+
     public Meter(String name, String type, String flatUUID) {
         this.name = name;
         this.type = type;
         this.flatUUID=flatUUID;
         createUuid();
     }
+
+    public Map<String, String> meterToMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("name", name);
+        map.put("type", type);
+        map.put("flatUUID", flatUUID);
+        map.put("uuid", uuid.toString());
+        return map;
+    }
+
+    public Meter meterFromMap(Map<String, String> map) {
+        Meter meter = new Meter();
+        meter.setName(map.get("name"));
+        meter.setType(map.get("type"));
+        meter.setFlatUUID(map.get("flatUUID"));
+        meter.setUuid(UUID.fromString(map.get("uuid")));
+        return meter;
+    }
+
 
     public String getName() {
         return name;
