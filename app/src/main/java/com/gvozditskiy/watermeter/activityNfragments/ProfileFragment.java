@@ -74,12 +74,12 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
 
     //объекты, привязанные к квартире
     private Person person;
-    private final List<Meter> coldMeterList = new ArrayList<>();
-    private final List<Meter> hotMeterList = new ArrayList<>();
+    private List<Meter> coldMeterList = new ArrayList<>();
+    private List<Meter> hotMeterList = new ArrayList<>();
     private final List<Map> savedPage = new ArrayList<>();
 
-    final ColdRecyclerAdapter coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
-    final HotRecyclerAdapter hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
+    private ColdRecyclerAdapter coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
+    private HotRecyclerAdapter hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
 
     private boolean isRadioGroupSetup;
 
@@ -305,7 +305,11 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 }
                 if (i != -1) {
                     Log.d(TAG_LOG, "OnCheckedChange");
-                    flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
+                    try {
+                        flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     setupFlat();
                 }
             }
@@ -335,6 +339,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             initColdRecycler(tempBundle);
             initHotRecycler(tempBundle);
         } else {
+            //// TODO: 30.12.2016 подтягивать данные из базы, если первый запуск 
             coldMeterList.clear();
             hotMeterList.clear();
             person = new Person();
@@ -346,7 +351,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         otch.setText(person.getPatronymic());
         street.setText(person.getStreet());
         building.setText(person.getBuilding());
-        flat.setText(person.getBuilding());
+        flat.setText(person.getFlat());
         telephone.setText(person.getPhone());
         spinner.setSelection(
                 Arrays.asList(getResources().getStringArray(R.array.streets)).indexOf(person.getsType()),
@@ -459,11 +464,13 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     private void initColdRecycler(Bundle savedState) {
         if (savedState != null) {
             List<Meter> savedColdList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("cold");
-            coldMeterList.clear();
+
+            coldMeterList=new ArrayList<>();
             coldMeterList.addAll(savedColdList);
         } else {
             coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, "g"));
         }
+        coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
 //        coldMeterList.add(new Meter("ХВ2", Meter.TYPE_COLD, "ghh"));
         coldAdapter.setOnClickInterface(new ColdRecyclerAdapter.OnClickInterface() {
             @Override
@@ -482,11 +489,12 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     private void initHotRecycler(Bundle savedState) {
         if (savedState != null) {
             List<Meter> savedHotList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("hot");
-            hotMeterList.clear();
+            hotMeterList = new ArrayList<>();
             hotMeterList.addAll(savedHotList);
         } else {
             hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, "g"));
         }
+        hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
 //        hotMeterList.add(new Meter("ГВ2", Meter.TYPE_HOT, "ghh"));
 //        hotMeterList.add(new Meter("ГВ3", Meter.TYPE_HOT, "ghh"));
         hotAdapter.setOnClickInterface(new HotRecyclerAdapter.OnClickHotInterface() {
@@ -521,6 +529,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             getActivity().finish();
 //            editor.apply();
         }
+        // TODO: 30.12.2016 сохранить все данные в базу данных 
         // 2 вносим все данные в SharedPrefs
     }
 }
