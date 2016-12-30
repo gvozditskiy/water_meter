@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -17,11 +18,13 @@ public class ProfileActivity extends AppCompatActivity implements RegisterSaveIn
 
 
     private static final String TAG_PROF = "ProfileFragment";
+    private static final String TAG_LOG = "ProfileActivity";
     OnSaveListener onSaveListener;
     Button btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG_LOG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         ActionBar actionBar = getSupportActionBar();
@@ -30,8 +33,12 @@ public class ProfileActivity extends AppCompatActivity implements RegisterSaveIn
         ProfileFragment fragment;
         FragmentTransaction ft = fm.beginTransaction();
         if (savedInstanceState==null) {
+            Log.d(TAG_LOG, "new ProfileFragment()");
+
             fragment = new ProfileFragment();
         } else {
+            Log.d(TAG_LOG, "(ProfileFragment) fm.findFragmentByTag(TAG_PROF)");
+
             fragment = (ProfileFragment) fm.findFragmentByTag(TAG_PROF);
         }
         ft.replace(R.id.activity_profile_container, fragment, TAG_PROF);

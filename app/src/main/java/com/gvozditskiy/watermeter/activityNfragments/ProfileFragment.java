@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,16 +40,17 @@ import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class ProfileFragment extends Fragment implements OnSaveListener {
+
+    private final String TAG_LOG = "ProfileFragment";
     TextInputEditText name;
     TextInputEditText secName;
     TextInputEditText otch;
@@ -79,6 +81,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     final ColdRecyclerAdapter coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
     final HotRecyclerAdapter hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
 
+    private boolean isRadioGroupSetup;
+
+    int prevId;
+
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -87,19 +93,18 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG_LOG, "onCreate");
         sp = getActivity().getSharedPreferences(Utils.PREFS_PROFILE, Context.MODE_PRIVATE);
         coldAdapter.setContext(getContext());
         hotAdapter.setContext(getContext());
 
-        if (savedInstanceState!=null) {
-            savedPage.addAll((List<Map>) savedInstanceState.getSerializable("savePage"));
-            getContext();
-        }
+
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.d(TAG_LOG, "onAttach");
         if (context instanceof RegisterSaveInterface) {
             registerInterface = (RegisterSaveInterface) context;
         } else {
@@ -111,13 +116,19 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        Log.d(TAG_LOG, "onCreateViewCreateView");
         registerInterface.onRegisterSaveInterface(this);
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG_LOG, "onViewCreated");
+        if (savedInstanceState != null) {
+            savedPage.addAll((List<Map>) savedInstanceState.getSerializable("savePage"));
+//            isRadioGroupSetup = true; //выставляем флаг, чтобы не сохранять состояние квартиры при инициализации радиогруппы
+        }
         //инициализация Views
         initViews(view);
 
@@ -131,26 +142,24 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 fragment.setOnUpdateListener(new OnUpdate() {
                     @Override
                     public void onUpdate() {
-                        setUpRadioGroup();
+                        setUpRadioGroup(savedInstanceState);
 
                     }
                 });
                 fragment.show(fm, "");
-
-                //// TODO: 27.12.2016 переделать в обычный фрагмент 
             }
         });
 
-        setUpRadioGroup();
-        initColdRecycler(savedInstanceState);
-        initHotRecycler(savedInstanceState);
+        setUpRadioGroup(savedInstanceState);
+//        initColdRecycler(savedInstanceState);
+//        initHotRecycler(savedInstanceState);
 
         addCold.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int coldListSize = coldMeterList.size();
                 String uid = Utils.getFlatList(getContext()).get(radioGroup.getCheckedRadioButtonId()).getUuid().toString();
-                String name = coldListSize >= 1 ? "ХВ" + String.valueOf(coldListSize+1) : "ХВ";
+                String name = coldListSize >= 1 ? "ХВ" + String.valueOf(coldListSize + 1) : "ХВ";
                 coldMeterList.add(new Meter(name, Meter.TYPE_COLD, uid));
                 coldAdapter.notifyItemInserted(coldListSize);
             }
@@ -161,7 +170,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             public void onClick(View view) {
                 int hotListSize = hotMeterList.size();
                 String uid = Utils.getFlatList(getContext()).get(radioGroup.getCheckedRadioButtonId()).getUuid().toString();
-                String name = hotListSize >= 1 ? "ГВ" + String.valueOf(hotListSize+1) : "ГВ";
+                String name = hotListSize >= 1 ? "ГВ" + String.valueOf(hotListSize + 1) : "ГВ";
                 hotMeterList.add(new Meter(name, Meter.TYPE_HOT, uid));
                 hotAdapter.notifyItemInserted(hotListSize);
             }
@@ -189,7 +198,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
          * если savedState!=null, заполняем поля из Bundle
          * иначе данные берем из SharedPrefs
          */
-        if (savedInstanceState == null) {
+       /* if (savedInstanceState == null) {
             name.setText(sp.getString(Utils.PREFS_PROFILE_NAME, ""));
             secName.setText(sp.getString(Utils.PREFS_PROFILE_SECNAME, ""));
             otch.setText(sp.getString(Utils.PREFS_PROFILE_OTCH, ""));
@@ -207,7 +216,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             flat.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_FLAT, ""));
             telephone.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_TELE, ""));
             spinner.setSelection(savedInstanceState.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0), true);
-        }
+        }             */
+
     }
 
     /**
@@ -235,6 +245,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
 
     /**
      * Инициализирует все view (view.findViewById() )
+     *
      * @param view View корневого лэйаута
      */
     private void initViews(View view) {
@@ -257,7 +268,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         addHot = (ImageButton) view.findViewById(R.id.frag_prof_addHot);
     }
 
-    private void setUpRadioGroup() {
+    private void setUpRadioGroup(final Bundle savedState) {
+        Log.d(TAG_LOG, "setUpRadioGroup()");
+        isRadioGroupSetup = true;
         final List<Flat> flatList = Utils.getFlatList(getContext());
         int id = 0;
         radioGroup.removeAllViews();
@@ -272,8 +285,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             rBtn.setBackground(getResources().getDrawable(R.drawable.flat_selector));
             radioGroup.addView(rBtn);
         }
+
         try {
-            flatName.setText(flatList.get(0).getName());
+            radioGroup.clearCheck();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -281,21 +295,68 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
-                if (i != -1) {
-                    flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
+
+                /**
+                 * при переключении радиогруппы сохранить состояние текущего экрана
+                 * не делать сохранение, если это инициализация после изменения конфигурации!!!!
+                 */
+                if (!isRadioGroupSetup) { //////////////????????????????????
+                    saveFlatState();
                 }
-
-                saveFlatState();
-
-
+                if (i != -1) {
+                    Log.d(TAG_LOG, "OnCheckedChange");
+                    flatName.setText(Utils.getFlatList(getContext()).get(i).getName());
+                    setupFlat();
+                }
             }
         });
 
-        radioGroup.clearCheck();
+
         radioGroup.check(0);
+        prevId = radioGroup.getCheckedRadioButtonId();
+        isRadioGroupSetup = false;
+
+    }
+
+    /**
+     * Заполняет все View квартиры
+     */
+    private void setupFlat() {
+        Log.d(TAG_LOG, "setupFlat");
+        int pos = radioGroup.getCheckedRadioButtonId();
+        Person person;
+
+        if (pos < savedPage.size()) {
+            Map map = savedPage.get(pos);
+            person = Person.personFromMap((Map<String, String>) map.get("person"));
+            Bundle tempBundle = new Bundle();
+            tempBundle.putSerializable("cold", (Serializable) map.get("cold"));
+            tempBundle.putSerializable("hot", (Serializable) map.get("hot"));
+            initColdRecycler(tempBundle);
+            initHotRecycler(tempBundle);
+        } else {
+            coldMeterList.clear();
+            hotMeterList.clear();
+            person = new Person();
+            initColdRecycler(null);
+            initHotRecycler(null);
+        }
+        name.setText(person.getName());
+        secName.setText(person.getSurname());
+        otch.setText(person.getPatronymic());
+        street.setText(person.getStreet());
+        building.setText(person.getBuilding());
+        flat.setText(person.getBuilding());
+        telephone.setText(person.getPhone());
+        spinner.setSelection(
+                Arrays.asList(getResources().getStringArray(R.array.streets)).indexOf(person.getsType()),
+                true
+        );
+
     }
 
     private void saveFlatState() {
+        Log.d(TAG_LOG, "saveFlatState");
         /**
          * сохранение состояния квартиры
          */
@@ -303,11 +364,11 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         person = new Person();
         person.setName(name.getText().toString());
         person.setSurname(secName.getText().toString());
-        person.setPatronymic( otch.getText().toString());
-        person.setStreet( street.getText().toString());
-        person.setBuilding( building.getText().toString());
-        person.setFlat( flat.getText().toString());
-        person.setPhone( telephone.getText().toString().replace(" ", ""));
+        person.setPatronymic(otch.getText().toString());
+        person.setStreet(street.getText().toString());
+        person.setBuilding(building.getText().toString());
+        person.setFlat(flat.getText().toString());
+        person.setPhone(telephone.getText().toString().replace(" ", ""));
         person.setsType(String.valueOf(spinner.getSelectedItem()));
 
         Map<String, Object> saveMap = new HashMap<>();
@@ -316,17 +377,11 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         saveMap.put("person", person.personToMap());
 
         try {
-            savedPage.remove(radioGroup.getCheckedRadioButtonId());
+            savedPage.set(prevId, saveMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            savedPage.add(saveMap);
         }
-
-        try {
-            
-            savedPage.add(radioGroup.getCheckedRadioButtonId(), saveMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        prevId = radioGroup.getCheckedRadioButtonId();
     }
 
     @Override
@@ -402,9 +457,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     }
 
     private void initColdRecycler(Bundle savedState) {
-        if (savedState!=null) {
-            // TODO: 29.12.2016 куда потерялись индикаторы? 
+        if (savedState != null) {
             List<Meter> savedColdList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("cold");
+            coldMeterList.clear();
             coldMeterList.addAll(savedColdList);
         } else {
             coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, "g"));
@@ -416,7 +471,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 coldMeterList.remove(i);
 //                coldAdapter.notifyDataSetChanged();
                 coldAdapter.notifyItemRemoved(i);
-                coldAdapter.notifyItemRangeChanged(i, coldMeterList.size()-i);
+                coldAdapter.notifyItemRangeChanged(i, coldMeterList.size() - i);
             }
         });
         coldRecycler.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -425,9 +480,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     }
 
     private void initHotRecycler(Bundle savedState) {
-        if (savedState!=null) {
+        if (savedState != null) {
             List<Meter> savedHotList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("hot");
-
+            hotMeterList.clear();
             hotMeterList.addAll(savedHotList);
         } else {
             hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, "g"));
@@ -439,7 +494,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             public void onClick(int i) {
                 hotMeterList.remove(i);
                 hotAdapter.notifyItemRemoved(i);
-                hotAdapter.notifyItemRangeChanged(i, hotMeterList.size()-i);
+                hotAdapter.notifyItemRangeChanged(i, hotMeterList.size() - i);
 
             }
         });
@@ -447,7 +502,6 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         hotRecycler.setAdapter(hotAdapter);
 
     }
-
 
 
     @Override
