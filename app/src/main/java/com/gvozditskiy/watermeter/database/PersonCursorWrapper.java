@@ -1,0 +1,32 @@
+package com.gvozditskiy.watermeter.database;
+
+import android.database.Cursor;
+import android.database.CursorWrapper;
+
+import com.gvozditskiy.watermeter.Indication;
+import com.gvozditskiy.watermeter.Person;
+
+import static com.gvozditskiy.watermeter.database.DbSchema.IndTable;
+
+/**
+ * Created by Alexey on 24.12.2016.
+ */
+
+public class PersonCursorWrapper extends CursorWrapper {
+    public PersonCursorWrapper(Cursor cursor) {
+        super(cursor);
+    }
+
+    public Person getPerson() {
+        Person person = new Person();
+        person.setName(getString(getColumnIndex(DbSchema.UserTable.Cols.FIRSTNAME)));
+        person.setSurname(getString(getColumnIndex(DbSchema.UserTable.Cols.SECONDNAME)));
+        person.setPatronymic(getString(getColumnIndex(DbSchema.UserTable.Cols.PATRONYMIC)));
+        person.setsType(getString(getColumnIndex(DbSchema.UserTable.Cols.STREET_TYPE)));
+        person.setStreet(getString(getColumnIndex(DbSchema.UserTable.Cols.STREET)));
+        person.setBuilding(getString(getColumnIndex(DbSchema.UserTable.Cols.BUILDING)));
+        person.setFlat(getString(getColumnIndex(DbSchema.UserTable.Cols.FLAT)));
+        person.setPhone(getString(getColumnIndex(DbSchema.UserTable.Cols.PHONE)));
+        return person;
+    }
+}

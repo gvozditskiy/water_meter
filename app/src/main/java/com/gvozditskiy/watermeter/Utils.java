@@ -9,6 +9,8 @@ import com.gvozditskiy.watermeter.database.BaseHelper;
 import com.gvozditskiy.watermeter.database.DbSchema;
 import com.gvozditskiy.watermeter.database.FlatCursorWrapper;
 import com.gvozditskiy.watermeter.database.IndicationCursorWrapper;
+import com.gvozditskiy.watermeter.database.MeterCursorWrapper;
+import com.gvozditskiy.watermeter.database.PersonCursorWrapper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,6 +116,35 @@ public class Utils {
         );
         return new FlatCursorWrapper(cursor);
     }
+
+    private static MeterCursorWrapper queryMeter(Context context, String whereClaus, String[] whereArgs) {
+        mDatabase = new BaseHelper(context).getWritableDatabase();
+        Cursor cursor = mDatabase.query(
+                DbSchema.MeterTable.NAME,
+                null,
+                whereClaus,
+                whereArgs,
+                null,
+                null,
+                null
+        );
+        return new MeterCursorWrapper(cursor);
+    }
+
+    private static PersonCursorWrapper queryPerson(Context context, String whereClaus, String[] whereArgs) {
+        mDatabase = new BaseHelper(context).getWritableDatabase();
+        Cursor cursor = mDatabase.query(
+                DbSchema.UserTable.NAME,
+                null,
+                whereClaus,
+                whereArgs,
+                null,
+                null,
+                null
+        );
+        return new PersonCursorWrapper(cursor);
+    }
+
 
     /**
      * Возвращает список индикаций за год

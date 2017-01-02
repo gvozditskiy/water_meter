@@ -1,8 +1,10 @@
 package com.gvozditskiy.watermeter.activityNfragments;
 
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
@@ -34,6 +36,8 @@ import com.gvozditskiy.watermeter.Meter;
 import com.gvozditskiy.watermeter.Person;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
+import com.gvozditskiy.watermeter.database.BaseHelper;
+import com.gvozditskiy.watermeter.database.DbSchema;
 import com.gvozditskiy.watermeter.interfaces.OnSaveListener;
 import com.gvozditskiy.watermeter.interfaces.OnUpdate;
 import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
@@ -44,6 +48,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.gvozditskiy.watermeter.database.DbSchema.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -137,6 +143,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         flatEditBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 FlatEditorFragment fragment = new FlatEditorFragment();
                 FragmentManager fm = getChildFragmentManager();
                 fragment.setOnUpdateListener(new OnUpdate() {
@@ -272,6 +279,15 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         Log.d(TAG_LOG, "setUpRadioGroup()");
         isRadioGroupSetup = true;
         final List<Flat> flatList = Utils.getFlatList(getContext());
+        if (flatList.size()==0) {
+            Flat flat = new Flat("Моя квартира");
+            flatList.add(flat);
+            SQLiteDatabase db = new BaseHelper(getContext()).getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(FlatsTable.Cols.NAME, flat.getName());
+            cv.put(FlatsTable.Cols.UUID, flat.getUuid().toString());
+            db.insert(FlatsTable.NAME, null, cv);
+        }
         int id = 0;
         radioGroup.removeAllViews();
         for (Flat flat : flatList) {
@@ -330,7 +346,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         int pos = radioGroup.getCheckedRadioButtonId();
         Person person;
 
-        if (pos < savedPage.size()) {
+        if (pos < savedPage.size() && savedPage.size()!=0) {
             Map map = savedPage.get(pos);
             person = Person.personFromMap((Map<String, String>) map.get("person"));
             Bundle tempBundle = new Bundle();
@@ -340,6 +356,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             initHotRecycler(tempBundle);
         } else {
             //// TODO: 30.12.2016 подтягивать данные из базы, если первый запуск 
+            // TODO: 02.01.2017 что здесь происходит???? 
             coldMeterList.clear();
             hotMeterList.clear();
             person = new Person();
@@ -373,6 +390,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         person.setStreet(street.getText().toString());
         person.setBuilding(building.getText().toString());
         person.setFlat(flat.getText().toString());
+        person.setFlat_uuid(Utils.getFlatList(getContext()).get(radioGroup.getCheckedRadioButtonId()).getUuid().toString());
         person.setPhone(telephone.getText().toString().replace(" ", ""));
         person.setsType(String.valueOf(spinner.getSelectedItem()));
 
@@ -387,6 +405,34 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             savedPage.add(saveMap);
         }
         prevId = radioGroup.getCheckedRadioButtonId();
+    }
+
+    private void saveFlatState(int pos) {
+        Log.d(TAG_LOG, "saveFlatState");
+        /**
+         * сохранение состояния квартиры
+         */
+        //person
+        person = new Person();
+        person.setName(name.getText().toString());
+        person.setSurname(secName.getText().toString());
+        person.setPatronymic(otch.getText().toString());
+        person.setStreet(street.getText().toString());
+        person.setBuilding(building.getText().toString());
+        person.setFlat(flat.getText().toString());
+        person.setPhone(telephone.getText().toString().replace(" ", ""));
+        person.setsType(String.valueOf(spinner.getSelectedItem()));
+
+        Map<String, Object> saveMap = new HashMap<>();
+        saveMap.put("cold", coldMeterList);
+        saveMap.put("hot", hotMeterList);
+        saveMap.put("person", person.personToMap());
+
+        try {
+            savedPage.set(pos, saveMap);
+        } catch (Exception e) {
+            savedPage.add(saveMap);
+        }
     }
 
     @Override
@@ -465,10 +511,16 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         if (savedState != null) {
             List<Meter> savedColdList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("cold");
 
-            coldMeterList=new ArrayList<>();
+            coldMeterList = new ArrayList<>();
             coldMeterList.addAll(savedColdList);
         } else {
-            coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, "g"));
+            String flatUuid = "";
+            try {
+                flatUuid = Utils.getFlatList(getContext()).get(radioGroup.getCheckedRadioButtonId()).getUuid().toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, flatUuid));
         }
         coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
 //        coldMeterList.add(new Meter("ХВ2", Meter.TYPE_COLD, "ghh"));
@@ -492,7 +544,13 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             hotMeterList = new ArrayList<>();
             hotMeterList.addAll(savedHotList);
         } else {
-            hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, "g"));
+            String flatUuid = "";
+            try {
+                flatUuid = Utils.getFlatList(getContext()).get(radioGroup.getCheckedRadioButtonId()).getUuid().toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, flatUuid));
         }
         hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
 //        hotMeterList.add(new Meter("ГВ2", Meter.TYPE_HOT, "ghh"));
@@ -528,6 +586,39 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             editor.commit();
             getActivity().finish();
 //            editor.apply();
+        }
+        saveFlatState(radioGroup.getCheckedRadioButtonId());
+        List<Meter> list = new ArrayList<>();
+        List<Person> pList = new ArrayList<>();
+        int rSize = radioGroup.getChildCount();
+        for (int i = 0; i < rSize; i++) {
+            list.addAll((List<Meter>) savedPage.get(i).get("cold"));
+            list.addAll((List<Meter>) savedPage.get(i).get("hot"));
+            pList.add(new Person().personFromMap((Map<String, String>) savedPage.get(i).get("person")));
+        }
+        SQLiteDatabase db = new BaseHelper(getContext()).getWritableDatabase();
+        db.execSQL("delete from " + MeterTable.NAME);
+        db.execSQL("delete from " + UserTable.NAME);
+        for (Meter meter : list) {
+            ContentValues meterCV = new ContentValues();
+            meterCV.put(MeterTable.Cols.NAME, meter.getName());
+            meterCV.put(MeterTable.Cols.TYPE, meter.getType());
+            meterCV.put(MeterTable.Cols.FLAT_UUID, meter.getFlatUUID());
+            meterCV.put(MeterTable.Cols.UUID, meter.getUuid().toString());
+            db.insert(MeterTable.NAME, null, meterCV);
+        }
+
+        for (Person p : pList) {
+            ContentValues pCV = new ContentValues();
+            pCV.put(UserTable.Cols.FIRSTNAME, p.getName());
+            pCV.put(UserTable.Cols.SECONDNAME, p.getSurname());
+            pCV.put(UserTable.Cols.PATRONYMIC, p.getPatronymic());
+            pCV.put(UserTable.Cols.STREET_TYPE, p.getsType());
+            pCV.put(UserTable.Cols.STREET, p.getStreet());
+            pCV.put(UserTable.Cols.BUILDING, p.getBuilding());
+            pCV.put(UserTable.Cols.FLAT, p.getFlat());
+            pCV.put(UserTable.Cols.PHONE, p.getPhone());
+            db.insert(UserTable.NAME, null, pCV);
         }
         // TODO: 30.12.2016 сохранить все данные в базу данных 
         // 2 вносим все данные в SharedPrefs

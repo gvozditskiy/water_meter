@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import static com.gvozditskiy.watermeter.database.DbSchema.*;
 import static com.gvozditskiy.watermeter.database.DbSchema.FlatsTable;
 import static com.gvozditskiy.watermeter.database.DbSchema.IndTable;
 import static com.gvozditskiy.watermeter.database.DbSchema.UserTable;
@@ -32,7 +33,10 @@ public class BaseHelper extends SQLiteOpenHelper {
                 UserTable.Cols.SECONDNAME + ", " +
                 UserTable.Cols.PATRONYMIC + ", " +
                 UserTable.Cols.STREET + ", " +
+                UserTable.Cols.STREET_TYPE + ", " +
                 UserTable.Cols.BUILDING + ", " +
+                UserTable.Cols.PHONE + ", " +
+                UserTable.Cols.FLAT_UUID + ", " +
                 UserTable.Cols.FLAT + ")"
         );
 
@@ -48,6 +52,14 @@ public class BaseHelper extends SQLiteOpenHelper {
                 " _id integer primary key autoincrement, " +
                 FlatsTable.Cols.NAME + ", " +
                 FlatsTable.Cols.UUID + ")"
+        );
+
+        db.execSQL("create table " + MeterTable.NAME + "(" +
+                " _id integer primary key autoincrement, " +
+               MeterTable.Cols.NAME + ", " +
+               MeterTable.Cols.TYPE + ", " +
+               MeterTable.Cols.UUID + ", " +
+                MeterTable.Cols.FLAT_UUID + ")"
         );
 
     }

@@ -21,6 +21,7 @@ public class Person implements Serializable {
     String street;
     String building;
     String flat;
+    String flat_uuid;
 
     String phone;
     String sType;
@@ -28,7 +29,7 @@ public class Person implements Serializable {
     public Person() {
     }
 
-    public Person(String surname, String name, String patronymic, String street, String building, String flat, String phone, String sType) {
+    public Person(String surname, String name, String patronymic, String street, String building, String flat, String flat_uuid, String phone, String sType) {
         this.surname = surname;
         this.name = name;
         this.patronymic = patronymic;
@@ -37,6 +38,7 @@ public class Person implements Serializable {
         this.flat = flat;
         this.phone = phone;
         this.sType = sType;
+        this.flat_uuid = flat_uuid;
     }
 
     public  Map<String, String> personToMap() {
@@ -47,6 +49,7 @@ public class Person implements Serializable {
         personMap.put("street", this.street);
         personMap.put("building", this.building);
         personMap.put("flat", this.flat);
+        personMap.put("flat_uuid", this.flat_uuid);
         personMap.put("phone", this.phone);
         personMap.put("sType", this.sType);
         return personMap;
@@ -62,6 +65,7 @@ public class Person implements Serializable {
         person.setFlat(map.get("flat"));
         person.setPhone(map.get("phone"));
         person.setsType(map.get("sType"));
+        person.setFlat_uuid(map.get("flat_uuid"));
         return person;
     }
 
@@ -127,5 +131,13 @@ public class Person implements Serializable {
 
     public void setsType(String sType) {
         this.sType = sType;
+    }
+
+    public String getFlat_uuid() {
+        return flat_uuid;
+    }
+
+    public void setFlat_uuid(String flat_uuid) {
+        this.flat_uuid = flat_uuid;
     }
 }

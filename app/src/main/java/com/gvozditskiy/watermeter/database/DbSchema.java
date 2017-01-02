@@ -13,8 +13,11 @@ public class DbSchema {
             public static final String FIRSTNAME = "first_name";
             public static final String PATRONYMIC = "patronymic";
             public static final String STREET = "street";
+            public static final String STREET_TYPE = "street_type";
             public static final String BUILDING = "building";
             public static final String FLAT = "flat";
+            public static final String FLAT_UUID = "flat_UUID";
+            public static final String PHONE = "phone";
         }
     }
 
@@ -35,7 +38,19 @@ public class DbSchema {
 
         public static class Cols {
             public static final String NAME = "name";
-            public static final String UUID = "flat_uuid";
+            public static final String UUID = "uuid";
         }
+    }
+
+    public static final class MeterTable {
+        public static final String NAME = "meters";
+
+        public static   class Cols {
+            public static final String TYPE = "type";
+            public static final String NAME = "name";
+            public static final String UUID = "uuid";
+            public static final String FLAT_UUID = "flat_uuid";
+        }
+
     }
 }
