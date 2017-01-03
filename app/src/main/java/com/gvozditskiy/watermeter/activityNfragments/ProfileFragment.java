@@ -303,6 +303,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         }
 
         try {
+            radioGroup.setOnCheckedChangeListener(null);
             radioGroup.clearCheck();
         } catch (Exception e) {
             e.printStackTrace();
@@ -357,8 +358,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         } else {
             //// TODO: 30.12.2016 подтягивать данные из базы, если первый запуск 
             // TODO: 02.01.2017 что здесь происходит???? 
-            coldMeterList.clear();
-            hotMeterList.clear();
+//            coldMeterList.clear();
+//            hotMeterList.clear();
+            coldMeterList = new ArrayList<>();
+            hotMeterList = new ArrayList<>();
             person = new Person();
             initColdRecycler(null);
             initHotRecycler(null);
@@ -390,7 +393,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         person.setStreet(street.getText().toString());
         person.setBuilding(building.getText().toString());
         person.setFlat(flat.getText().toString());
-        person.setFlat_uuid(Utils.getFlatList(getContext()).get(radioGroup.getCheckedRadioButtonId()).getUuid().toString());
+        person.setFlat_uuid(Utils.getFlatList(getContext()).get(prevId).getUuid().toString());
         person.setPhone(telephone.getText().toString().replace(" ", ""));
         person.setsType(String.valueOf(spinner.getSelectedItem()));
 
@@ -420,6 +423,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         person.setStreet(street.getText().toString());
         person.setBuilding(building.getText().toString());
         person.setFlat(flat.getText().toString());
+        person.setFlat_uuid(Utils.getFlatList(getContext()).get(pos).getUuid().toString());
         person.setPhone(telephone.getText().toString().replace(" ", ""));
         person.setsType(String.valueOf(spinner.getSelectedItem()));
 
@@ -617,6 +621,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             pCV.put(UserTable.Cols.STREET, p.getStreet());
             pCV.put(UserTable.Cols.BUILDING, p.getBuilding());
             pCV.put(UserTable.Cols.FLAT, p.getFlat());
+            pCV.put(UserTable.Cols.FLAT_UUID, p.getFlat_uuid());
             pCV.put(UserTable.Cols.PHONE, p.getPhone());
             db.insert(UserTable.NAME, null, pCV);
         }
