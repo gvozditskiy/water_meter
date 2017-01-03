@@ -47,6 +47,7 @@
     <string name="frag_prof_nobuilding_message">Не указан дом</string>
     <string name="frag_prof_noflat_message">Не указана квартира</string>
     <string name="frag_prof_notelephone_message">Не указан телефон</string>
+    <string name="frag_prof_nometers_message">Не добавлено ни одного счетчика</string>
 
 
     <!--///////////////frag_stat////////-->

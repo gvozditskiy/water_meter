@@ -201,31 +201,12 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         //
         setupInfoDialog();
 
+    }
 
-        /**
-         * если savedState!=null, заполняем поля из Bundle
-         * иначе данные берем из SharedPrefs
-         */
-       /* if (savedInstanceState == null) {
-            name.setText(sp.getString(Utils.PREFS_PROFILE_NAME, ""));
-            secName.setText(sp.getString(Utils.PREFS_PROFILE_SECNAME, ""));
-            otch.setText(sp.getString(Utils.PREFS_PROFILE_OTCH, ""));
-            street.setText(sp.getString(Utils.PREFS_PROFILE_STREET, ""));
-            spinner.setSelection(sp.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0), true);
-            building.setText(sp.getString(Utils.PREFS_PROFILE_BUILDING, ""));
-            flat.setText(sp.getString(Utils.PREFS_PROFILE_FLAT, ""));
-            telephone.setText(sp.getString(Utils.PREFS_PROFILE_TELE, ""));
-        } else {
-            name.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_NAME, ""));
-            secName.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_SECNAME, ""));
-            otch.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_OTCH, ""));
-            street.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_STREET, ""));
-            building.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_BUILDING, ""));
-            flat.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_FLAT, ""));
-            telephone.setText(savedInstanceState.getString(Utils.PREFS_PROFILE_TELE, ""));
-            spinner.setSelection(savedInstanceState.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0), true);
-        }             */
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        saveFlatState(radioGroup.getCheckedRadioButtonId());
     }
 
     /**
@@ -369,7 +350,6 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         } else
 
         {
-            //// TODO: 30.12.2016 подтягивать данные из базы, если первый запуск
             coldMeterList = new ArrayList<>();
             hotMeterList = new ArrayList<>();
             person = new Person();
@@ -385,34 +365,20 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         flat.setText(person.getFlat());
         telephone.setText(person.getPhone());
         spinner.setSelection(
-                Arrays.asList(
-
-                        getResources()
-
-                                .
-
-                                        getStringArray(R.array.streets)
-
-                ).
-
-                        indexOf(person.getsType()
-
-                        ),
-                true
-        );
-
+                Arrays.asList(getResources().getStringArray(R.array.streets))
+                        .indexOf(person.getsType()),true);
     }
 
     private void loadFlatDataFromDb() {
         List<Flat> flatsFromDB = Utils.getFlatList(getContext());
         List<Person> pListFromDB = Utils.getPersonList(getContext());
         List<Meter> metersFromDB = Utils.getMeterLsit(getContext());
-        Map<String, Object> saveMap = new HashMap<>();
+        int flatI = 0;
         for (Flat flat : flatsFromDB) {
+            Map<String, Object> saveMap = new HashMap<>();
             coldMeterList = new ArrayList<>();
             hotMeterList = new ArrayList<>();
             String flat_uuid = flat.getUuid().toString();
-            int flatI = 0;
             if (pListFromDB.size()>0) {
                 saveMap.put("person", pListFromDB.get(flatI++).personToMap());
             }
@@ -509,59 +475,134 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         outState.putSerializable("savePage", (Serializable) savedPage);
     }
 
+    /**
+     * ПРоверяет, все ли поля заполнены
+     * @return
+     */
     private boolean checkFields() {
+        Map<String, Object> saveMap;
+        //сохраним данные текущей квартиры на случай, если придется переключаться на другие
+        saveFlatState(radioGroup.getCheckedRadioButtonId());
+        int pagePos = 0;
         Boolean b = true;
 
-        if (secName.getText().toString().equals("")) {
-            secName.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_nosecname_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
+        for (Map<String, Object> map:savedPage) {
 
+            Person pers = Person.personFromMap((Map<String, String>)map.get("person"));
+            if (pers.getSurname().equals("") || pers.getSurname()==null) {
+                radioGroup.check(pagePos);
+                secName.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_nosecname_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+            if (pers.getName().equals("") || pers.getName()==null) {
+                radioGroup.check(pagePos);
+                name.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_noname_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+            if (pers.getPatronymic().equals("") || pers.getPatronymic()==null) {
+                radioGroup.check(pagePos);
+                otch.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_nootch_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+
+            if (pers.getStreet().equals("") || pers.getStreet()==null) {
+                radioGroup.check(pagePos);
+                street.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_nostreet_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+            if (pers.getBuilding().equals("") || pers.getBuilding()==null) {
+                radioGroup.check(pagePos);
+                building.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_nobuilding_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+            if (pers.getFlat().equals("") || pers.getFlat()==null) {
+                radioGroup.check(pagePos);
+                flat.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_noflat_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+            if (pers.getPhone().equals("") || pers.getPhone()==null) {
+                radioGroup.check(pagePos);
+                telephone.requestFocus();
+                Toast.makeText(getContext(), getString(R.string.frag_prof_notelephone_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+
+            int meterCount = ((List<Meter>)map.get("cold")).size()+((List<Meter>)map.get("hot")).size();
+            if (meterCount==0) {
+                radioGroup.check(pagePos);
+                Toast.makeText(getContext(), getString(R.string.frag_prof_nometers_message), Toast.LENGTH_SHORT).show();
+                b=false;
+                return false;
+            }
+
+            pagePos++;
         }
 
-        if (name.getText().toString().equals("")) {
-            name.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_noname_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
-        }
+//
 
-        if (otch.getText().toString().equals("")) {
-            otch.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_nootch_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
-
-        }
-        if (street.getText().toString().equals("")) {
-            street.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_nostreet_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
-
-        }
-        if (building.getText().toString().equals("")) {
-            building.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_nobuilding_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
-
-        }
-        if (flat.getText().toString().equals("")) {
-            flat.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_noflat_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
-
-        }
-        if (telephone.getText().toString().equals("")) {
-            telephone.requestFocus();
-            Toast.makeText(getContext(), getString(R.string.frag_prof_notelephone_message), Toast.LENGTH_SHORT).show();
-            b = false;
-            return false;
-
-        }
+//        if (secName.getText().toString().equals("")) {
+//            secName.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_nosecname_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//
+//        }
+//
+//        if (name.getText().toString().equals("")) {
+//            name.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_noname_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//        }
+//
+//        if (otch.getText().toString().equals("")) {
+//            otch.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_nootch_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//
+//        }
+//        if (street.getText().toString().equals("")) {
+//            street.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_nostreet_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//
+//        }
+//        if (building.getText().toString().equals("")) {
+//            building.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_nobuilding_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//
+//        }
+//        if (flat.getText().toString().equals("")) {
+//            flat.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_noflat_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//
+//        }
+//        if (telephone.getText().toString().equals("")) {
+//            telephone.requestFocus();
+//            Toast.makeText(getContext(), getString(R.string.frag_prof_notelephone_message), Toast.LENGTH_SHORT).show();
+//            b = false;
+//            return false;
+//
+//        }
         return b;
     }
 
@@ -632,52 +673,42 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     public void onSave() {
         // 1 проверяем все ли введены данные
         if (checkFields()) {
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putString(Utils.PREFS_PROFILE_NAME, name.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_SECNAME, secName.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_OTCH, otch.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_STREET, street.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_BUILDING, building.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_FLAT, flat.getText().toString());
-            editor.putString(Utils.PREFS_PROFILE_TELE, telephone.getText().toString().replace(" ", ""));
-            editor.putInt(Utils.PREFS_PROFILE_STREET_TYPE, spinner.getSelectedItemPosition());
-            editor.commit();
+            saveFlatState(radioGroup.getCheckedRadioButtonId());
+            List<Meter> list = new ArrayList<>();
+            List<Person> pList = new ArrayList<>();
+            int rSize = radioGroup.getChildCount();
+            for (int i = 0; i < rSize; i++) {
+                list.addAll((List<Meter>) savedPage.get(i).get("cold"));
+                list.addAll((List<Meter>) savedPage.get(i).get("hot"));
+                pList.add(new Person().personFromMap((Map<String, String>) savedPage.get(i).get("person")));
+            }
+            SQLiteDatabase db = new BaseHelper(getContext()).getWritableDatabase();
+            db.execSQL("delete from " + MeterTable.NAME);
+            db.execSQL("delete from " + UserTable.NAME);
+            for (Meter meter : list) {
+                ContentValues meterCV = new ContentValues();
+                meterCV.put(MeterTable.Cols.NAME, meter.getName());
+                meterCV.put(MeterTable.Cols.TYPE, meter.getType());
+                meterCV.put(MeterTable.Cols.FLAT_UUID, meter.getFlatUUID());
+                meterCV.put(MeterTable.Cols.UUID, meter.getUuid().toString());
+                db.insert(MeterTable.NAME, null, meterCV);
+            }
+
+            for (Person p : pList) {
+                ContentValues pCV = new ContentValues();
+                pCV.put(UserTable.Cols.FIRSTNAME, p.getName());
+                pCV.put(UserTable.Cols.SECONDNAME, p.getSurname());
+                pCV.put(UserTable.Cols.PATRONYMIC, p.getPatronymic());
+                pCV.put(UserTable.Cols.STREET_TYPE, p.getsType());
+                pCV.put(UserTable.Cols.STREET, p.getStreet());
+                pCV.put(UserTable.Cols.BUILDING, p.getBuilding());
+                pCV.put(UserTable.Cols.FLAT, p.getFlat());
+                pCV.put(UserTable.Cols.FLAT_UUID, p.getFlat_uuid());
+                pCV.put(UserTable.Cols.PHONE, p.getPhone());
+                db.insert(UserTable.NAME, null, pCV);
+            }
             getActivity().finish();
-//            editor.apply();
-        }
-        saveFlatState(radioGroup.getCheckedRadioButtonId());
-        List<Meter> list = new ArrayList<>();
-        List<Person> pList = new ArrayList<>();
-        int rSize = radioGroup.getChildCount();
-        for (int i = 0; i < rSize; i++) {
-            list.addAll((List<Meter>) savedPage.get(i).get("cold"));
-            list.addAll((List<Meter>) savedPage.get(i).get("hot"));
-            pList.add(new Person().personFromMap((Map<String, String>) savedPage.get(i).get("person")));
-        }
-        SQLiteDatabase db = new BaseHelper(getContext()).getWritableDatabase();
-        db.execSQL("delete from " + MeterTable.NAME);
-        db.execSQL("delete from " + UserTable.NAME);
-        for (Meter meter : list) {
-            ContentValues meterCV = new ContentValues();
-            meterCV.put(MeterTable.Cols.NAME, meter.getName());
-            meterCV.put(MeterTable.Cols.TYPE, meter.getType());
-            meterCV.put(MeterTable.Cols.FLAT_UUID, meter.getFlatUUID());
-            meterCV.put(MeterTable.Cols.UUID, meter.getUuid().toString());
-            db.insert(MeterTable.NAME, null, meterCV);
         }
 
-        for (Person p : pList) {
-            ContentValues pCV = new ContentValues();
-            pCV.put(UserTable.Cols.FIRSTNAME, p.getName());
-            pCV.put(UserTable.Cols.SECONDNAME, p.getSurname());
-            pCV.put(UserTable.Cols.PATRONYMIC, p.getPatronymic());
-            pCV.put(UserTable.Cols.STREET_TYPE, p.getsType());
-            pCV.put(UserTable.Cols.STREET, p.getStreet());
-            pCV.put(UserTable.Cols.BUILDING, p.getBuilding());
-            pCV.put(UserTable.Cols.FLAT, p.getFlat());
-            pCV.put(UserTable.Cols.FLAT_UUID, p.getFlat_uuid());
-            pCV.put(UserTable.Cols.PHONE, p.getPhone());
-            db.insert(UserTable.NAME, null, pCV);
-        }
     }
 }
