@@ -413,18 +413,24 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             hotMeterList = new ArrayList<>();
             String flat_uuid = flat.getUuid().toString();
             int flatI = 0;
-            saveMap.put("person", pListFromDB.get(flatI++).personToMap());
-
-            for (Meter meter : metersFromDB) {
-                if (meter.getFlatUUID().equals(flat_uuid) && meter.getType().equals(Meter.TYPE_COLD)) {
-                    coldMeterList.add(meter);
-                } else if (meter.getFlatUUID().equals(flat_uuid) && meter.getType().equals(Meter.TYPE_HOT)) {
-                    hotMeterList.add(meter);
-                }
+            if (pListFromDB.size()>0) {
+                saveMap.put("person", pListFromDB.get(flatI++).personToMap());
             }
-            saveMap.put("cold", coldMeterList);
-            saveMap.put("hot", hotMeterList);
-            savedPage.add(saveMap);
+
+            if (metersFromDB.size()>0) {
+                for (Meter meter : metersFromDB) {
+                    if (meter.getFlatUUID().toString().equals(flat_uuid) && meter.getType().equals(Meter.TYPE_COLD)) {
+                        coldMeterList.add(meter);
+                    } else if (meter.getFlatUUID().toString().equals(flat_uuid) && meter.getType().equals(Meter.TYPE_HOT)) {
+                        hotMeterList.add(meter);
+                    }
+                }
+                saveMap.put("cold", coldMeterList);
+                saveMap.put("hot", hotMeterList);
+            }
+            if (pListFromDB.size()>0) {
+                savedPage.add(saveMap);
+            }
         }
     }
 

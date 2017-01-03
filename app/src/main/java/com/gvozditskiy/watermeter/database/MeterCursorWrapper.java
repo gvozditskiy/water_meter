@@ -24,7 +24,7 @@ public class MeterCursorWrapper extends CursorWrapper {
         Meter meter = new Meter();
         meter.setName(getString(getColumnIndex(MeterTable.Cols.NAME)));
         meter.setType(getString(getColumnIndex(MeterTable.Cols.TYPE)));
-        meter.setFlatUUID(getString(getColumnIndex(MeterTable.Cols.TYPE)));
+        meter.setFlatUUID(getString(getColumnIndex(MeterTable.Cols.FLAT_UUID)));
         meter.setUuid(UUID.fromString(getString(getColumnIndex(MeterTable.Cols.UUID))));
         return meter;
     }
