@@ -26,6 +26,7 @@ public class PersonCursorWrapper extends CursorWrapper {
         person.setStreet(getString(getColumnIndex(DbSchema.UserTable.Cols.STREET)));
         person.setBuilding(getString(getColumnIndex(DbSchema.UserTable.Cols.BUILDING)));
         person.setFlat(getString(getColumnIndex(DbSchema.UserTable.Cols.FLAT)));
+        person.setFlat_uuid(getString(getColumnIndex(DbSchema.UserTable.Cols.FLAT_UUID)));
         person.setPhone(getString(getColumnIndex(DbSchema.UserTable.Cols.PHONE)));
         return person;
     }

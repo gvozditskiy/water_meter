@@ -37,7 +37,6 @@ import com.gvozditskiy.watermeter.Person;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
-import com.gvozditskiy.watermeter.database.DbSchema;
 import com.gvozditskiy.watermeter.interfaces.OnSaveListener;
 import com.gvozditskiy.watermeter.interfaces.OnUpdate;
 import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
@@ -49,7 +48,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.gvozditskiy.watermeter.database.DbSchema.*;
+import static com.gvozditskiy.watermeter.database.DbSchema.FlatsTable;
+import static com.gvozditskiy.watermeter.database.DbSchema.MeterTable;
+import static com.gvozditskiy.watermeter.database.DbSchema.UserTable;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -279,7 +280,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         Log.d(TAG_LOG, "setUpRadioGroup()");
         isRadioGroupSetup = true;
         final List<Flat> flatList = Utils.getFlatList(getContext());
-        if (flatList.size()==0) {
+        if (flatList.size() == 0) {
             Flat flat = new Flat("Моя квартира");
             flatList.add(flat);
             SQLiteDatabase db = new BaseHelper(getContext()).getWritableDatabase();
@@ -307,6 +308,13 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             radioGroup.clearCheck();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if (isRadioGroupSetup) {
+            /**
+             * загружаем данные из базы
+             */
+            loadFlatDataFromDb();
         }
 
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -347,7 +355,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         int pos = radioGroup.getCheckedRadioButtonId();
         Person person;
 
-        if (pos < savedPage.size() && savedPage.size()!=0) {
+
+
+        if (pos < savedPage.size() && savedPage.size() != 0)
+        {
             Map map = savedPage.get(pos);
             person = Person.personFromMap((Map<String, String>) map.get("person"));
             Bundle tempBundle = new Bundle();
@@ -355,17 +366,17 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             tempBundle.putSerializable("hot", (Serializable) map.get("hot"));
             initColdRecycler(tempBundle);
             initHotRecycler(tempBundle);
-        } else {
-            //// TODO: 30.12.2016 подтягивать данные из базы, если первый запуск 
-            // TODO: 02.01.2017 что здесь происходит???? 
-//            coldMeterList.clear();
-//            hotMeterList.clear();
+        } else
+
+        {
+            //// TODO: 30.12.2016 подтягивать данные из базы, если первый запуск
             coldMeterList = new ArrayList<>();
             hotMeterList = new ArrayList<>();
             person = new Person();
             initColdRecycler(null);
             initHotRecycler(null);
         }
+
         name.setText(person.getName());
         secName.setText(person.getSurname());
         otch.setText(person.getPatronymic());
@@ -374,10 +385,47 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         flat.setText(person.getFlat());
         telephone.setText(person.getPhone());
         spinner.setSelection(
-                Arrays.asList(getResources().getStringArray(R.array.streets)).indexOf(person.getsType()),
+                Arrays.asList(
+
+                        getResources()
+
+                                .
+
+                                        getStringArray(R.array.streets)
+
+                ).
+
+                        indexOf(person.getsType()
+
+                        ),
                 true
         );
 
+    }
+
+    private void loadFlatDataFromDb() {
+        List<Flat> flatsFromDB = Utils.getFlatList(getContext());
+        List<Person> pListFromDB = Utils.getPersonList(getContext());
+        List<Meter> metersFromDB = Utils.getMeterLsit(getContext());
+        Map<String, Object> saveMap = new HashMap<>();
+        for (Flat flat : flatsFromDB) {
+            coldMeterList = new ArrayList<>();
+            hotMeterList = new ArrayList<>();
+            String flat_uuid = flat.getUuid().toString();
+            int flatI = 0;
+            saveMap.put("person", pListFromDB.get(flatI++).personToMap());
+
+            for (Meter meter : metersFromDB) {
+                if (meter.getFlatUUID().equals(flat_uuid) && meter.getType().equals(Meter.TYPE_COLD)) {
+                    coldMeterList.add(meter);
+                } else if (meter.getFlatUUID().equals(flat_uuid) && meter.getType().equals(Meter.TYPE_HOT)) {
+                    hotMeterList.add(meter);
+                }
+            }
+            saveMap.put("cold", coldMeterList);
+            saveMap.put("hot", hotMeterList);
+            savedPage.add(saveMap);
+        }
     }
 
     private void saveFlatState() {
@@ -625,7 +673,5 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             pCV.put(UserTable.Cols.PHONE, p.getPhone());
             db.insert(UserTable.NAME, null, pCV);
         }
-        // TODO: 30.12.2016 сохранить все данные в базу данных 
-        // 2 вносим все данные в SharedPrefs
     }
 }

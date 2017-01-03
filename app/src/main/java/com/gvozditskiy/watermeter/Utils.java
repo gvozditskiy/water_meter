@@ -207,4 +207,39 @@ public class Utils {
         }
         return flats;
     }
+
+    /**
+     * Возвращает список плательщиков
+     * @param context
+     * @return
+     */
+    public static List<Person> getPersonList(Context context) {
+        List<Person> persons = new ArrayList<>();
+        PersonCursorWrapper cursor = queryPerson(context, null,null );
+        cursor.moveToFirst();
+        try {
+            while (!cursor.isAfterLast()) {
+                persons.add(cursor.getPerson());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return persons;
+    }
+
+    public static List<Meter> getMeterLsit(Context context) {
+        List<Meter> meters = new ArrayList<>();
+        MeterCursorWrapper cursor = queryMeter(context, null,null);
+        cursor.moveToFirst();
+        try {
+            while (!cursor.isAfterLast()) {
+                meters.add(cursor.getMeter());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return meters;
+    }
 }
