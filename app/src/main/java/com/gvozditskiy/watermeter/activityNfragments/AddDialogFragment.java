@@ -42,8 +42,8 @@ public class AddDialogFragment extends DialogFragment {
         View v = getActivity().getLayoutInflater().inflate(R.layout.frag_dialog_add, null, false);
         Spinner spinYear = (Spinner) v.findViewById(R.id.frag_add_year_spinner);
         final Spinner spinMonth = (Spinner) v.findViewById(R.id.frag_add_month_spinner);
-        final EditText cold = (EditText) v.findViewById(R.id.frag_add_coldwater);
-        final EditText hot = (EditText) v.findViewById(R.id.frag_add_hotwater);
+        final EditText cold = (EditText) v.findViewById(R.id.frag_add_coldwater_recycler);
+        final EditText hot = (EditText) v.findViewById(R.id.frag_add_hotwater_recycler);
         ind = new Indication();
         final List<Integer> yearsList = new ArrayList<>();
         List<Integer> monthList = new ArrayList<>();

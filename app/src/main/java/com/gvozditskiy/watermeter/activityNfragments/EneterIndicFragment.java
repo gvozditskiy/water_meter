@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatEditText;
+import android.support.v7.widget.AppCompatSpinner;
 import android.telephony.SmsManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,9 +24,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gvozditskiy.watermeter.Flat;
 import com.gvozditskiy.watermeter.Indication;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
@@ -54,6 +57,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     private TextView deltaColdTv;
     private TextView deltaHotTv;
     private TextView summaryTv;
+    private AppCompatSpinner spinner;
 
     private Context mContext;
     private SQLiteDatabase mDatabase;
@@ -114,90 +118,26 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        curCold = (AppCompatEditText) view.findViewById(R.id.frag_add_coldwater);
-        curHot = (AppCompatEditText) view.findViewById(R.id.frag_add_hotwater);
-        lastCold = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_last_coldwater);
-        lastHot = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_last_hotwater);
-        deltaColdTv = (TextView) view.findViewById(R.id.frag_enter_ind_coldDelta);
-        deltaHotTv = (TextView) view.findViewById(R.id.frag_enter_ind_hotDelta);
+//        curCold = (AppCompatEditText) view.findViewById(R.id.frag_add_coldwater_recycler);
+//        curHot = (AppCompatEditText) view.findViewById(R.id.frag_add_hotwater_recycler);
+//        lastCold = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_last_coldwater_recycler);
+//        lastHot = (AppCompatEditText) view.findViewById(R.id.frag_enter_ind_last_hotwater_recycler);
+//        deltaColdTv = (TextView) view.findViewById(R.id.frag_enter_ind_coldDelta);
+//        deltaHotTv = (TextView) view.findViewById(R.id.frag_enter_ind_hotDelta);
         summaryTv = (TextView) view.findViewById(R.id.frag_enter_ind_summary);
+        spinner = (AppCompatSpinner) view.findViewById(R.id.frag_enter_ind_spinner);
+
+        List<String> flatList = new ArrayList<>();
+        for (Flat flat : Utils.getFlatList(getContext())) {
+            flatList.add(flat.getName());
+        }
+        ArrayAdapter<String> spinAdapter = new ArrayAdapter(getContext(),
+                R.layout.flat_spinner_view, R.id.flat_spinner_tv, flatList);
+        spinner.setAdapter(spinAdapter);
 
         summaryTv.setText(String.format(getString(R.string.frag_enter_ind_summary), 0));
 
-        curCold.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                int lastC = 0;
-                if (!lastCold.getText().toString().equals("")) {
-                    lastC = Integer.parseInt(lastCold.getText().toString());
-                }
-                int curC = 0;
-                if (!charSequence.toString().equals("")) {
-                    curC = Integer.parseInt(charSequence.toString());
-                }
-                int coldDelta = Math.abs(curC - lastC);
-                int lastH = 0;
-                if (!lastHot.getText().toString().equals("")) {
-                    lastH = Integer.parseInt(lastHot.getText().toString());
-                }
-                int curH = 0;
-                if (!curHot.getText().toString().equals("")) {
-                    curH = Integer.parseInt(curHot.getText().toString());
-                }
-                int hotDelta = Math.abs(curH - lastH);
-                deltaColdTv.setText(String.format(getString(R.string.frag_enter_ind_delta), coldDelta));
-                summaryTv.setText(String.format(getString(R.string.frag_enter_ind_summary), coldDelta + hotDelta));
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        curHot.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                int lastC = 0;
-                if (!lastCold.getText().toString().equals("")) {
-                    lastC = Integer.parseInt(lastCold.getText().toString());
-                }
-                int curC = 0;
-                if (!curCold.getText().toString().equals("")) {
-                    curC = Integer.parseInt(curCold.getText().toString());
-                }
-                int coldDelta = Math.abs(curC - lastC);
-
-                int lastH = 0;
-                if (!lastHot.getText().toString().equals("")) {
-                    lastH = Integer.parseInt(lastHot.getText().toString());
-                }
-                int curH = 0;
-                if (!charSequence.toString().equals("")) {
-                    curH = Integer.parseInt(charSequence.toString());
-                }
-                int hotDelta = Math.abs(curH - lastH);
-                deltaHotTv.setText(String.format(getString(R.string.frag_enter_ind_delta), hotDelta));
-                summaryTv.setText(String.format(getString(R.string.frag_enter_ind_summary), coldDelta + hotDelta));
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        initInd();
+//        initInd();
 
         registerInterface.onRegisterInterface(this);
     }
@@ -214,7 +154,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
             case R.id.menu_add_add:
                 FragmentManager fm = getChildFragmentManager();
                 AddDialogFragment fragment = new AddDialogFragment();
-                fragment.show(fm, TAG_ADDFRAG );
+                fragment.show(fm, TAG_ADDFRAG);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -388,7 +328,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                                 sendSMS();
                             }
                         }).show();
-            } catch (Exception e ) {
+            } catch (Exception e) {
                 Toast.makeText(getContext(), "Показания счетчиков не отправлены. Проверьте введенные данные", Toast.LENGTH_SHORT).show();
             }
 
