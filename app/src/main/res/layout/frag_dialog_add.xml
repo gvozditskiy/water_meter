@@ -7,14 +7,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:paddingBottom="16dp"
     >
-    <android.support.v7.widget.AppCompatEditText
+    <android.support.v7.widget.RecyclerView
         android:layout_width="0dp"
-        android:layout_height="35dp"
+        android:layout_height="wrap_content"
+        android:maxHeight="300dp"
         android:paddingLeft="@dimen/editText_padding"
         android:inputType="numberDecimal"
         android:ems="10"
         android:id="@+id/frag_add_coldwater_recycler"
-        android:background="@drawable/background_cold"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/guideline1"
         android:layout_marginStart="16dp"
@@ -27,25 +27,6 @@
         tools:text="56"
         tools:ignore="RtlHardcoded,RtlSymmetry" />
 
-    <android.support.v7.widget.AppCompatEditText
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:paddingLeft="@dimen/editText_padding"
-        android:inputType="numberDecimal"
-        android:ems="10"
-        android:id="@+id/frag_add_hotwater_recycler"
-        android:background="@drawable/background_hot"
-        android:maxLines="1"
-        tools:text="31"
-        app:layout_constraintLeft_toLeftOf="@+id/guideline1"
-        android:layout_marginStart="24dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="16dp"
-        tools:ignore="RtlHardcoded,RtlSymmetry"
-        app:layout_constraintTop_toTopOf="@+id/frag_add_coldwater_recycler" />
-
     <TextView
         android:text="@string/frag_enter_ind_current_cold"
         android:layout_width="0dp"
@@ -54,28 +35,29 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/frag_add_year_spinner"
-        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/frag_add_flat_spinner"
+        android:layout_marginTop="8dp"
         app:layout_constraintRight_toRightOf="@+id/frag_add_coldwater_recycler"
         android:textAlignment="center" />
 
     <TextView
         android:text="@string/frag_enter_ind_current_hot"
-        android:layout_width="0dp"
+        android:layout_width="152dp"
         android:layout_height="wrap_content"
         android:id="@+id/frag_add_current_hot"
+        android:textAlignment="center"
         app:layout_constraintTop_toTopOf="@+id/frag_add_current_cold"
-        app:layout_constraintRight_toRightOf="@+id/frag_add_hotwater_recycler"
-        app:layout_constraintLeft_toLeftOf="@+id/frag_add_hotwater_recycler"
-        android:textAlignment="center" />
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="16dp" />
 
     <android.support.constraint.Guideline
         android:layout_width="0dp"
-        android:layout_height="181dp"
+        android:layout_height="367dp"
         android:id="@+id/guideline1"
         android:orientation="vertical"
         tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteX="192dp"
         app:layout_constraintGuide_percent="0.5" />
 
     <TextView
@@ -116,5 +98,40 @@
         app:layout_constraintTop_toBottomOf="@+id/frag_add_month_caption"
         app:layout_constraintLeft_toLeftOf="@+id/frag_add_month_caption"
         android:entries="@array/month"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="152dp"
+        android:layout_height="wrap_content"
+        android:maxHeight="300dp"
+        android:paddingLeft="@dimen/editText_padding"
+        android:inputType="numberDecimal"
+        android:ems="10"
+        android:id="@+id/frag_add_hotwater_recycler"
+        android:maxLines="1"
+        tools:text="31"
+        tools:ignore="RtlHardcoded,RtlSymmetry"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="16dp"
+        app:layout_constraintTop_toTopOf="@+id/frag_add_coldwater_recycler"
+        app:layout_constraintLeft_toLeftOf="@+id/guideline1"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp" />
+
+    <android.support.v7.widget.AppCompatSpinner
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:id="@+id/frag_add_flat_spinner"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frag_add_year_spinner"
+        android:layout_marginTop="16dp"
+        app:layout_constraintHorizontal_bias="0.66"
+        android:spinnerMode="dialog"/>
 
 </android.support.constraint.ConstraintLayout>

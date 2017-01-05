@@ -68,6 +68,7 @@
     <!--//////////////frsg_add/////-->
     <string name="frag_add_month">Месяц</string>
     <string name="frag_add_year">Год</string>
+    <string name="frag_add_flat">Квартира</string>
 
     <string-array name="streets">
         <item>Улица</item>

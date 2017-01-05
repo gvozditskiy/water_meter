@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,7 +18,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.gvozditskiy.watermeter.Flat;
+import com.gvozditskiy.watermeter.IndAdapters.ColdCurrentAdapter;
+import com.gvozditskiy.watermeter.IndAdapters.HotCurrentAdapter;
 import com.gvozditskiy.watermeter.Indication;
+import com.gvozditskiy.watermeter.Meter;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
@@ -25,7 +32,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Alexey on 26.12.2016.
@@ -34,7 +43,13 @@ import java.util.List;
 public class AddDialogFragment extends DialogFragment {
     int selectedYear;
     Indication ind;
-
+    List<Meter> coldMeterList = new ArrayList<>();
+    List<Meter> hotMeterList = new ArrayList<>();
+    List<Map<String, String>> listForColdRecycler = new ArrayList<>();
+    List<Map<String, String>> listForHotRecycler = new ArrayList<>();
+    List<Flat> flatList;
+    ColdCurrentAdapter coldCurrentAdapter;
+    HotCurrentAdapter hotCurrentAdapter;
 
     @NonNull
     @Override
@@ -42,12 +57,79 @@ public class AddDialogFragment extends DialogFragment {
         View v = getActivity().getLayoutInflater().inflate(R.layout.frag_dialog_add, null, false);
         Spinner spinYear = (Spinner) v.findViewById(R.id.frag_add_year_spinner);
         final Spinner spinMonth = (Spinner) v.findViewById(R.id.frag_add_month_spinner);
-        final EditText cold = (EditText) v.findViewById(R.id.frag_add_coldwater_recycler);
-        final EditText hot = (EditText) v.findViewById(R.id.frag_add_hotwater_recycler);
+        RecyclerView coldRcycler = (RecyclerView) v.findViewById(R.id.frag_add_coldwater_recycler);
+        RecyclerView hotRcycler = (RecyclerView) v.findViewById(R.id.frag_add_hotwater_recycler);
+        AppCompatSpinner flatSpinner = (AppCompatSpinner) v.findViewById(R.id.frag_add_flat_spinner);
+        coldCurrentAdapter = new ColdCurrentAdapter(getContext(), false);
+        hotCurrentAdapter = new HotCurrentAdapter(getContext(), false);
+        coldRcycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        hotRcycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        coldRcycler.setAdapter(coldCurrentAdapter);
+        hotRcycler.setAdapter(hotCurrentAdapter);
+        coldCurrentAdapter.setDataSet(listForColdRecycler);
+        hotCurrentAdapter.setDataSet(listForHotRecycler);
+
         ind = new Indication();
         final List<Integer> yearsList = new ArrayList<>();
-        List<Integer> monthList = new ArrayList<>();
         final List<Indication> indList = new ArrayList<>();
+        List<String> flatNameList = new ArrayList<>();
+        flatList = Utils.getFlatList(getContext().getApplicationContext());
+        for (Flat flat : flatList) {
+            flatNameList.add(flat.getName());
+
+        }
+
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getContext(),
+                R.layout.flat_spinner_view, R.id.flat_spinner_tv, flatNameList);
+        flatSpinner.setAdapter(spinnerAdapter);
+        flatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Flat flat = flatList.get(i);
+                String flatUUID = flat.getUuid().toString();
+                coldMeterList = new ArrayList<Meter>();
+                hotMeterList = new ArrayList<Meter>();
+                for (Meter meter : Utils.getMeterLsit(getContext().getApplicationContext())) {
+                    if (meter.getFlatUUID().equals(flatUUID)) {
+                        if (meter.getType().equals(Meter.TYPE_COLD)) {
+                            coldMeterList.add(meter);
+                        } else if (meter.getType().equals(Meter.TYPE_HOT)) {
+                            hotMeterList.add(meter);
+                        }
+                    }
+                }
+                listForColdRecycler.clear();
+                listForHotRecycler.clear();
+                for (Meter meter:coldMeterList) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", meter.getName());
+                    map.put("value", "0");
+                    listForColdRecycler.add(map);
+                    coldCurrentAdapter.notifyDataSetChanged();
+                }
+                for (Meter meter:hotMeterList) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("name", meter.getName());
+                    map.put("value", "0");
+                    listForHotRecycler.add(map);
+                    hotCurrentAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        flatSpinner.setSelection(0);
+
+
+
+
+
+
+
+
 
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
@@ -88,14 +170,10 @@ public class AddDialogFragment extends DialogFragment {
                 boolean b = false;
                 for (Indication ind : indList) {
                     if (ind.getYear() == selectedYear && ind.getMonth() == i) {
-                        cold.setText(String.valueOf(ind.getCold()));
-                        hot.setText(String.valueOf(ind.getHot()));
                         b = true;
                     }
                 }
                 if (!b) {
-                    cold.setText("");
-                    hot.setText("");
                 }
                 ind.setMonth(i);
             }
@@ -112,16 +190,6 @@ public class AddDialogFragment extends DialogFragment {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        int c = 0;
-                        if (!cold.getText().toString().equals("")) {
-                            c = Integer.parseInt(cold.getText().toString());
-                        }
-                        int h = 0;
-                        if (!hot.getText().toString().equals("")) {
-                            h = Integer.parseInt(hot.getText().toString());
-                        }
-                        ind.setCold(c);
-                        ind.setHot(h);
                         SQLiteDatabase mDatabase = new BaseHelper(getContext()).getWritableDatabase();
                         mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(ind));
                         Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();

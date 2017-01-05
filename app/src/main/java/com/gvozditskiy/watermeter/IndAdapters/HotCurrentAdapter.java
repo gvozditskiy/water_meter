@@ -2,6 +2,8 @@ package com.gvozditskiy.watermeter.IndAdapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 
 import com.gvozditskiy.watermeter.R;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,14 +26,26 @@ public class HotCurrentAdapter extends RecyclerView.Adapter<HotCurrentAdapter.Ho
      * Map<String, String> - map, в которой содержатся name счетчика и показание value, delta для дельты
      */
     List<Map<String,String>> meters;
+    List<String> values;
+    boolean vis;
 
     public HotCurrentAdapter(Context mContext) {
         this.mContext = mContext;
     }
+    public HotCurrentAdapter(Context mContext, boolean visibl) {
+        this.mContext = mContext;
+        this.vis = visibl;
+    }
 
     public void setDataSet(List<Map<String, String>> list) {
         meters=list;
+        values = new ArrayList<>(meters.size());
     }
+
+    public List<String> getValuesList() {
+        return values;
+    }
+
 
     @Override
     public HotCurrentVH onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -40,10 +55,34 @@ public class HotCurrentAdapter extends RecyclerView.Adapter<HotCurrentAdapter.Ho
     }
 
     @Override
-    public void onBindViewHolder(HotCurrentVH holder, int position) {
+    public void onBindViewHolder(HotCurrentVH holder, final int position) {
         holder.tv.setText(meters.get(position).get("name"));
         holder.et.setText(meters.get(position).get("value"));
-        holder.delta.setText(meters.get(position).get("delta"));
+        if (vis) {
+            holder.delta.setText(meters.get(position).get("delta"));
+        } else {
+            holder.delta.setVisibility(View.GONE);
+        }
+        holder.et.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                try {
+                    values.set(position, charSequence.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     @Override
