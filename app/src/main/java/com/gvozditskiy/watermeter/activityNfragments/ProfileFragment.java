@@ -86,6 +86,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     private final List<Map> savedPage = new ArrayList<>();
 
     private ColdRecyclerAdapter coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
+
     private HotRecyclerAdapter hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
 
     private boolean isRadioGroupSetup;
@@ -104,8 +105,6 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         sp = getActivity().getSharedPreferences(Utils.PREFS_PROFILE, Context.MODE_PRIVATE);
         coldAdapter.setContext(getContext());
         hotAdapter.setContext(getContext());
-
-
     }
 
     @Override
@@ -170,6 +169,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 String name = coldListSize >= 1 ? "ХВ" + String.valueOf(coldListSize + 1) : "ХВ";
                 coldMeterList.add(new Meter(name, Meter.TYPE_COLD, uid));
                 coldAdapter.notifyItemInserted(coldListSize);
+                if (coldMeterList.size()==2) { //меняем имя 0-го счетчика
+                    coldMeterList.get(0).setName("ХВ1");
+                    coldAdapter.notifyDataSetChanged();
+                }
             }
         });
 
@@ -181,6 +184,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 String name = hotListSize >= 1 ? "ГВ" + String.valueOf(hotListSize + 1) : "ГВ";
                 hotMeterList.add(new Meter(name, Meter.TYPE_HOT, uid));
                 hotAdapter.notifyItemInserted(hotListSize);
+                if (hotMeterList.size()==2) {//меняем имя 0-го счетчика
+                    hotMeterList.get(0).setName("ГВ1");
+                    hotAdapter.notifyDataSetChanged();
+                }
             }
         });
 
@@ -418,8 +425,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         person.setsType(String.valueOf(spinner.getSelectedItem()));
 
         Map<String, Object> saveMap = new HashMap<>();
-        saveMap.put("cold", coldMeterList);
-        saveMap.put("hot", hotMeterList);
+        saveMap.put("cold", coldAdapter.getList());
+        saveMap.put("hot", hotAdapter.getList());
         saveMap.put("person", person.personToMap());
 
         try {
@@ -448,8 +455,8 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         person.setsType(String.valueOf(spinner.getSelectedItem()));
 
         Map<String, Object> saveMap = new HashMap<>();
-        saveMap.put("cold", coldMeterList);
-        saveMap.put("hot", hotMeterList);
+        saveMap.put("cold", coldAdapter.getList());
+        saveMap.put("hot", hotAdapter.getList());
         saveMap.put("person", person.personToMap());
 
         try {

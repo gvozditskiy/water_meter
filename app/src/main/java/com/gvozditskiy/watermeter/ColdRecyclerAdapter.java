@@ -3,6 +3,8 @@ package com.gvozditskiy.watermeter;
 import android.content.Context;
 import android.media.Image;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +34,10 @@ public class ColdRecyclerAdapter extends RecyclerView.Adapter<ColdRecyclerAdapte
         this.context = context;
     }
 
+    public List<Meter> getList() {
+        return meterList;
+    }
+
     public ColdRecyclerAdapter(Context context, List<Meter> list) {
         this.context = context;
         meterList = list;
@@ -54,6 +60,22 @@ public class ColdRecyclerAdapter extends RecyclerView.Adapter<ColdRecyclerAdapte
             }
         });
         Glide.with(context).load("").placeholder(R.drawable.ic_meter_cold).into(holder.meter);
+        holder.nameText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                meterList.get(position).setName(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     @Override
@@ -78,4 +100,6 @@ public class ColdRecyclerAdapter extends RecyclerView.Adapter<ColdRecyclerAdapte
     public interface OnClickInterface {
         void onClick(int i);
     }
+
+
 }
