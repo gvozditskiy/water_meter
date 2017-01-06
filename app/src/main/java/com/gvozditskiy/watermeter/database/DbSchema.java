@@ -25,11 +25,11 @@ public class DbSchema {
         public static final String NAME = "indicators";
 
         public static class Cols {
-            public static final String UID = "uid";
+            public static final String UUID = "uuid";
             public static final String YEAR = "year";
             public static final String MONTH = "month";
-            public static final String COLD = "cold";
-            public static final String HOT = "hot";
+            public static final String VALUE = "value";
+            public static final String METER_UUID = "meter_uuid";
         }
     }
 

@@ -7,8 +7,9 @@ package com.gvozditskiy.watermeter;
 public class Indication {
     private int year;
     private int month;
-    private int cold;
-    private int hot;
+    private int value;
+    private String meterUuid;
+    private String uuid;
 
     public Indication() {
     }
@@ -29,19 +30,27 @@ public class Indication {
         this.month = month;
     }
 
-    public int getCold() {
-        return cold;
+    public int getValue() {
+        return value;
     }
 
-    public void setCold(int cold) {
-        this.cold = cold;
+    public void setValue(int value) {
+        this.value = value;
     }
 
-    public int getHot() {
-        return hot;
+    public String getMeterUuid() {
+        return meterUuid;
     }
 
-    public void setHot(int hot) {
-        this.hot = hot;
+    public void setMeterUuid(String meterUuid) {
+        this.meterUuid = meterUuid;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

@@ -20,8 +20,9 @@ public class IndicationCursorWrapper extends CursorWrapper {
         Indication indication = new Indication();
         indication.setYear(getInt(getColumnIndex(IndTable.Cols.YEAR)));
         indication.setMonth(getInt(getColumnIndex(IndTable.Cols.MONTH)));
-        indication.setCold(getInt(getColumnIndex(IndTable.Cols.COLD)));
-        indication.setHot(getInt(getColumnIndex(IndTable.Cols.HOT)));
+        indication.setValue(getInt(getColumnIndex(IndTable.Cols.VALUE)));
+        indication.setUuid(getString(getColumnIndex(IndTable.Cols.UUID)));
+        indication.setMeterUuid(getString(getColumnIndex(IndTable.Cols.METER_UUID)));
         return indication;
     }
 }

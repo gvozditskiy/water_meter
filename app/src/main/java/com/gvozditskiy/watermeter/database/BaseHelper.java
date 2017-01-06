@@ -42,10 +42,11 @@ public class BaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("create table " + IndTable.NAME + "(" +
                 " _id integer primary key autoincrement, " +
+                IndTable.Cols.UUID + ", " +
                 IndTable.Cols.YEAR + ", " +
                 IndTable.Cols.MONTH + ", " +
-                IndTable.Cols.COLD + ", " +
-                IndTable.Cols.HOT + ")"
+                IndTable.Cols.VALUE + ", " +
+                IndTable.Cols.METER_UUID + ")"
         );
 
         db.execSQL("create table " + FlatsTable.NAME + "(" +
