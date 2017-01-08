@@ -100,22 +100,22 @@ AppCompatSpinner spinner;
         BarSet sumBarSet = new BarSet();
         if (list.size() > 1) {
             for (int i = 1; i < list.size(); i++) {
-                deltaCold.add(list.get(i).getCold() - list.get(i - 1).getCold());
-                deltaHot.add(list.get(i).getHot() - list.get(i - 1).getHot());
-                summary.add(list.get(i).getCold() - list.get(i - 1).getCold() +
-                        list.get(i).getHot() - list.get(i - 1).getHot());
+//                deltaCold.add(list.get(i).getCold() - list.get(i - 1).getCold());
+//                deltaHot.add(list.get(i).getHot() - list.get(i - 1).getHot());
+//                summary.add(list.get(i).getCold() - list.get(i - 1).getCold() +
+//                        list.get(i).getHot() - list.get(i - 1).getHot());
                 row.add(String.valueOf(list.get(i).getMonth()) + "." + String.valueOf(list.get(i).getYear()));
                 String label = String.valueOf(list.get(i).getMonth() + 1) + "." + String.valueOf(list.get(i).getYear());
-                int cold = Math.abs(list.get(i).getCold() - list.get(i - 1).getCold());
-                int hot = Math.abs(list.get(i).getHot() - list.get(i - 1).getHot());
-                int sum = Math.abs(list.get(i).getCold() - list.get(i - 1).getCold()) +
-                        Math.abs(list.get(i).getHot() - list.get(i - 1).getHot());
-                coldSet.addPoint(label, cold);
-                hotSet.addPoint(label, hot);
-                sumSet.addPoint(label, sum);
-                coldBarSet.addBar(label, cold);
-                hotBarSet.addBar(label, hot);
-                sumBarSet.addBar(label, sum);
+//                int cold = Math.abs(list.get(i).getCold() - list.get(i - 1).getCold());
+//                int hot = Math.abs(list.get(i).getHot() - list.get(i - 1).getHot());
+//                int sum = Math.abs(list.get(i).getCold() - list.get(i - 1).getCold()) +
+//                        Math.abs(list.get(i).getHot() - list.get(i - 1).getHot());
+//                coldSet.addPoint(label, cold);
+//                hotSet.addPoint(label, hot);
+//                sumSet.addPoint(label, sum);
+//                coldBarSet.addBar(label, cold);
+//                hotBarSet.addBar(label, hot);
+//                sumBarSet.addBar(label, sum);
             }
 
         }

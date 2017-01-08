@@ -186,16 +186,16 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
             if (mMonth == 0) {
                 if (ind.getYear() == mYear - 1) {
                     if (ind.getMonth() == 11) {
-                        lastCold.setText(String.valueOf(ind.getCold()));
-                        lastHot.setText(String.valueOf(ind.getHot()));
+//                        lastCold.setText(String.valueOf(ind.getCold()));
+//                        lastHot.setText(String.valueOf(ind.getHot()));
                         b = true;
                     }
                 }
             } else {
                 if (ind.getYear() == mYear) {
                     if (ind.getMonth() == mMonth - 1) {
-                        lastCold.setText(String.valueOf(ind.getCold()));
-                        lastHot.setText(String.valueOf(ind.getHot()));
+//                        lastCold.setText(String.valueOf(ind.getCold()));
+//                        lastHot.setText(String.valueOf(ind.getHot()));
                         b = true;
                     }
                 }
@@ -204,8 +204,8 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
             if (ind.getYear() == mYear) {
                 if (ind.getMonth() == mMonth) {
 //                    if (mDay <= 10) {
-                    curHot.setText(String.valueOf(ind.getHot()));
-                    curCold.setText(String.valueOf(ind.getCold()));
+//                    curHot.setText(String.valueOf(ind.getHot()));
+//                    curCold.setText(String.valueOf(ind.getCold()));
                     curCold.setFocusable(false);
                     curCold.setCursorVisible(false);
                     curHot.setFocusable(false);
@@ -242,13 +242,13 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         }
 
         if (curC >= lastC) {
-            values.put(DbSchema.IndTable.Cols.COLD, curC);
+//            values.put(DbSchema.IndTable.Cols.COLD, curC);
         } else {
             return null;
         }
 
         if (curH >= lastH) {
-            values.put(DbSchema.IndTable.Cols.HOT, curH);
+//            values.put(DbSchema.IndTable.Cols.HOT, curH);
         }
 
 

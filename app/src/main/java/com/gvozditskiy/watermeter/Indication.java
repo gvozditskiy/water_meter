@@ -1,5 +1,7 @@
 package com.gvozditskiy.watermeter;
 
+import java.util.UUID;
+
 /**
  * Created by Alexey on 24.12.2016.
  */
@@ -9,9 +11,10 @@ public class Indication {
     private int month;
     private int value;
     private String meterUuid;
-    private String uuid;
+    private UUID uuid;
 
     public Indication() {
+        uuid = UUID.randomUUID();
     }
 
     public int getYear() {
@@ -46,11 +49,11 @@ public class Indication {
         this.meterUuid = meterUuid;
     }
 
-    public String getUuid() {
+    public UUID getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
+    public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
 }

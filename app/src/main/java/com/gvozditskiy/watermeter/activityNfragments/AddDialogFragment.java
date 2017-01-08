@@ -3,6 +3,7 @@ package com.gvozditskiy.watermeter.activityNfragments;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,6 +13,7 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -19,6 +21,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.gvozditskiy.watermeter.Flat;
+import com.gvozditskiy.watermeter.IndAdapters.AbstractCurrentAdapter;
 import com.gvozditskiy.watermeter.IndAdapters.ColdCurrentAdapter;
 import com.gvozditskiy.watermeter.IndAdapters.HotCurrentAdapter;
 import com.gvozditskiy.watermeter.Indication;
@@ -37,10 +40,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Добавляет показания за предыдущий месяц
  * Created by Alexey on 26.12.2016.
  */
 
 public class AddDialogFragment extends DialogFragment {
+    AlertDialog dialog;
     int selectedYear;
     Indication ind;
     List<Meter> coldMeterList = new ArrayList<>();
@@ -48,7 +53,7 @@ public class AddDialogFragment extends DialogFragment {
     List<Map<String, String>> listForColdRecycler = new ArrayList<>();
     List<Map<String, String>> listForHotRecycler = new ArrayList<>();
     List<Flat> flatList;
-    ColdCurrentAdapter coldCurrentAdapter;
+    AbstractCurrentAdapter coldCurrentAdapter;
     HotCurrentAdapter hotCurrentAdapter;
 
     @NonNull
@@ -60,6 +65,7 @@ public class AddDialogFragment extends DialogFragment {
         RecyclerView coldRcycler = (RecyclerView) v.findViewById(R.id.frag_add_coldwater_recycler);
         RecyclerView hotRcycler = (RecyclerView) v.findViewById(R.id.frag_add_hotwater_recycler);
         AppCompatSpinner flatSpinner = (AppCompatSpinner) v.findViewById(R.id.frag_add_flat_spinner);
+
         coldCurrentAdapter = new ColdCurrentAdapter(getContext(), false);
         hotCurrentAdapter = new HotCurrentAdapter(getContext(), false);
         coldRcycler.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -104,16 +110,21 @@ public class AddDialogFragment extends DialogFragment {
                     Map<String, String> map = new HashMap<>();
                     map.put("name", meter.getName());
                     map.put("value", "0");
+                    map.put("uuid", meter.getUuid().toString());
                     listForColdRecycler.add(map);
                     coldCurrentAdapter.notifyDataSetChanged();
                 }
+                coldCurrentAdapter.setDataSet(listForColdRecycler);
+
                 for (Meter meter:hotMeterList) {
                     Map<String, String> map = new HashMap<>();
                     map.put("name", meter.getName());
                     map.put("value", "0");
+                    map.put("uuid", meter.getUuid().toString());
                     listForHotRecycler.add(map);
                     hotCurrentAdapter.notifyDataSetChanged();
                 }
+                hotCurrentAdapter.setDataSet(listForHotRecycler);
             }
 
             @Override
@@ -175,7 +186,6 @@ public class AddDialogFragment extends DialogFragment {
                 }
                 if (!b) {
                 }
-                ind.setMonth(i);
             }
 
             @Override
@@ -184,19 +194,37 @@ public class AddDialogFragment extends DialogFragment {
             }
         });
 
-        return new AlertDialog.Builder(getContext())
+        dialog = new AlertDialog.Builder(getContext())
                 .setView(v)
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         SQLiteDatabase mDatabase = new BaseHelper(getContext()).getWritableDatabase();
-                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(ind));
-                        Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
+//                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(ind));
+                        List<Indication> coldIndList = coldCurrentAdapter.getIndicationsList();
+                        List<Indication> hotIndList = hotCurrentAdapter.getIndicationsList();
+                        coldIndList.size();
+                        for (int k=0; k<coldIndList.size(); k++) {
+                            coldIndList.get(k).setYear(selectedYear);
+                            coldIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
+                            mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(coldIndList.get(k)));
+                        }
+                        for (int k=0; k<hotIndList.size(); k++) {
+                            hotIndList.get(k).setYear(selectedYear);
+                            hotIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
+                            mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(hotIndList.get(k)));
+                        }
 
+                        Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .show();
+                .create();
+        dialog.show();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        return dialog;
     }
 
     private ArrayList<String> getMonth(int year) {
@@ -223,10 +251,11 @@ public class AddDialogFragment extends DialogFragment {
 
     private ContentValues getContentValues(Indication ind) {
         ContentValues values = new ContentValues();
-        values.put(DbSchema.IndTable.Cols.COLD, ind.getCold());
-        values.put(DbSchema.IndTable.Cols.HOT, ind.getHot());
         values.put(DbSchema.IndTable.Cols.YEAR, ind.getYear());
         values.put(DbSchema.IndTable.Cols.MONTH, ind.getMonth());
+        values.put(DbSchema.IndTable.Cols.METER_UUID, ind.getMeterUuid());
+        values.put(DbSchema.IndTable.Cols.VALUE, ind.getValue());
+        values.put(DbSchema.IndTable.Cols.UUID, ind.getUuid().toString());
 
         return values;
     }

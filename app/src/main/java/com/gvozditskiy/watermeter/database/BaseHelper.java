@@ -14,7 +14,7 @@ import static com.gvozditskiy.watermeter.database.DbSchema.UserTable;
  */
 
 public class BaseHelper extends SQLiteOpenHelper {
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private static final String DATABASE_NAME = "database.db";
 
 
@@ -75,6 +75,15 @@ public class BaseHelper extends SQLiteOpenHelper {
                 " _id integer primary key autoincrement, " +
                 FlatsTable.Cols.NAME + ", " +
                 FlatsTable.Cols.UUID + ")"
+        );
+
+        db.execSQL("create table " + IndTable.NAME + "(" +
+                " _id integer primary key autoincrement, " +
+                IndTable.Cols.UUID + ", " +
+                IndTable.Cols.YEAR + ", " +
+                IndTable.Cols.MONTH + ", " +
+                IndTable.Cols.VALUE + ", " +
+                IndTable.Cols.METER_UUID + ")"
         );
 
     }
