@@ -47,7 +47,6 @@ import java.util.Map;
 public class AddDialogFragment extends DialogFragment {
     AlertDialog dialog;
     int selectedYear;
-    Indication ind;
     List<Meter> coldMeterList = new ArrayList<>();
     List<Meter> hotMeterList = new ArrayList<>();
     List<Map<String, String>> listForColdRecycler = new ArrayList<>();
@@ -75,7 +74,6 @@ public class AddDialogFragment extends DialogFragment {
         coldCurrentAdapter.setDataSet(listForColdRecycler);
         hotCurrentAdapter.setDataSet(listForHotRecycler);
 
-        ind = new Indication();
         final List<Integer> yearsList = new ArrayList<>();
         final List<Indication> indList = new ArrayList<>();
         List<String> flatNameList = new ArrayList<>();
@@ -106,25 +104,9 @@ public class AddDialogFragment extends DialogFragment {
                 }
                 listForColdRecycler.clear();
                 listForHotRecycler.clear();
-                for (Meter meter:coldMeterList) {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("name", meter.getName());
-                    map.put("value", "0");
-                    map.put("uuid", meter.getUuid().toString());
-                    listForColdRecycler.add(map);
-                    coldCurrentAdapter.notifyDataSetChanged();
-                }
-                coldCurrentAdapter.setDataSet(listForColdRecycler);
 
-                for (Meter meter:hotMeterList) {
-                    Map<String, String> map = new HashMap<>();
-                    map.put("name", meter.getName());
-                    map.put("value", "0");
-                    map.put("uuid", meter.getUuid().toString());
-                    listForHotRecycler.add(map);
-                    hotCurrentAdapter.notifyDataSetChanged();
-                }
-                hotCurrentAdapter.setDataSet(listForHotRecycler);
+                setupColdIndications();
+                setupHotIndications();
             }
 
             @Override
@@ -163,7 +145,7 @@ public class AddDialogFragment extends DialogFragment {
                 spinMonth.setSelection(0, true);
                 indList.clear();
                 indList.addAll(Utils.getIndicationsList(yearsList.get(i), getContext()));
-                ind.setYear(yearsList.get(i));
+
             }
 
             @Override
@@ -178,14 +160,42 @@ public class AddDialogFragment extends DialogFragment {
         spinMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                boolean b = false;
+                listForColdRecycler.clear();
+                listForHotRecycler.clear();
                 for (Indication ind : indList) {
                     if (ind.getYear() == selectedYear && ind.getMonth() == i) {
-                        b = true;
+                        ///////////
+                        //заполняем listForColdRecycler и listForHotRecycler
+                            for (Meter cMeter: coldMeterList) {
+                                if (ind.getMeterUuid().equals(cMeter.getUuid().toString())) {
+                                    Map<String, String> map = new HashMap<>();
+                                    map.put("name", cMeter.getName());
+                                    map.put("value", String.valueOf(ind.getValue()));
+                                    map.put("uuid", cMeter.getUuid().toString());
+                                    listForColdRecycler.add(map);
+                                    continue;
+                                }
+                            }
+
+                            for (Meter hMeter: hotMeterList) {
+                                if (ind.getMeterUuid().equals(hMeter.getUuid().toString())) {
+                                    Map<String, String> map = new HashMap<>();
+                                    map.put("name", hMeter.getName());
+                                    map.put("value", String.valueOf(ind.getValue()));
+                                    map.put("uuid", hMeter.getUuid().toString());
+                                    listForHotRecycler.add(map);
+                                    continue;
+                                }
+                            }
+
+
+                        //////////
                     }
                 }
-                if (!b) {
-                }
+                coldCurrentAdapter.setDataSet(listForColdRecycler);
+                coldCurrentAdapter.notifyDataSetChanged();
+                hotCurrentAdapter.setDataSet(listForHotRecycler);
+                hotCurrentAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -225,6 +235,32 @@ public class AddDialogFragment extends DialogFragment {
         dialog.getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         return dialog;
+    }
+
+    private void setupHotIndications() {
+        for (Meter meter:hotMeterList) {
+            Map<String, String> map = new HashMap<>();
+            map.put("name", meter.getName());
+            map.put("value", "0");
+            map.put("uuid", meter.getUuid().toString());
+            listForHotRecycler.add(map);
+        }
+        hotCurrentAdapter.setDataSet(listForHotRecycler);
+        hotCurrentAdapter.notifyDataSetChanged();
+
+    }
+
+    private void setupColdIndications() {
+        for (Meter meter:coldMeterList) {
+            Map<String, String> map = new HashMap<>();
+            map.put("name", meter.getName());
+            map.put("value", "0");
+            map.put("uuid", meter.getUuid().toString());
+            listForColdRecycler.add(map);
+        }
+        coldCurrentAdapter.setDataSet(listForColdRecycler);
+        coldCurrentAdapter.notifyDataSetChanged();
+
     }
 
     private ArrayList<String> getMonth(int year) {
