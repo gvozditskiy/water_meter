@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -64,6 +65,7 @@ public class AddDialogFragment extends DialogFragment {
         RecyclerView coldRcycler = (RecyclerView) v.findViewById(R.id.frag_add_coldwater_recycler);
         RecyclerView hotRcycler = (RecyclerView) v.findViewById(R.id.frag_add_hotwater_recycler);
         AppCompatSpinner flatSpinner = (AppCompatSpinner) v.findViewById(R.id.frag_add_flat_spinner);
+        final Button addBtn = (Button) v.findViewById(R.id.frag_add_btn);
 
         coldCurrentAdapter = new ColdCurrentAdapter(getContext(), false);
         hotCurrentAdapter = new HotCurrentAdapter(getContext(), false);
@@ -82,6 +84,15 @@ public class AddDialogFragment extends DialogFragment {
             flatNameList.add(flat.getName());
 
         }
+
+        if (flatList.size()<=1) {
+            addBtn.setText(getResources().getString(R.string.frag_add_add));
+        } else {
+            addBtn.setText(getResources().getString(R.string.frag_add_add_flat));
+        }
+
+        indList.clear();
+        indList.addAll(Utils.getIndicationsList(0, getContext()));
 
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getContext(),
                 R.layout.flat_spinner_view, R.id.flat_spinner_tv, flatNameList);
@@ -105,8 +116,16 @@ public class AddDialogFragment extends DialogFragment {
                 listForColdRecycler.clear();
                 listForHotRecycler.clear();
 
-                setupColdIndications();
-                setupHotIndications();
+
+
+                try {
+                    int pos = spinMonth.getSelectedItemPosition();
+                    setupColdIndications(pos, indList);
+                    setupHotIndications(pos, indList);
+                } catch (Exception e) {
+                    setupColdIndications();
+                    setupHotIndications();
+                }
             }
 
             @Override
@@ -115,13 +134,6 @@ public class AddDialogFragment extends DialogFragment {
             }
         });
         flatSpinner.setSelection(0);
-
-
-
-
-
-
-
 
 
         Date date = new Date();
@@ -143,8 +155,14 @@ public class AddDialogFragment extends DialogFragment {
                 setSelectedYear(yearsList.get(i));
                 spinMonth.setAdapter(monthAdapter);
                 spinMonth.setSelection(0, true);
-                indList.clear();
-                indList.addAll(Utils.getIndicationsList(yearsList.get(i), getContext()));
+
+                int mSize = getMonth(selectedYear).size();
+                if (mSize==0) {
+                    addBtn.setEnabled(false);
+
+                } else {
+                    addBtn.setEnabled(true);
+                }
 
             }
 
@@ -160,42 +178,9 @@ public class AddDialogFragment extends DialogFragment {
         spinMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                listForColdRecycler.clear();
-                listForHotRecycler.clear();
-                for (Indication ind : indList) {
-                    if (ind.getYear() == selectedYear && ind.getMonth() == i) {
-                        ///////////
-                        //заполняем listForColdRecycler и listForHotRecycler
-                            for (Meter cMeter: coldMeterList) {
-                                if (ind.getMeterUuid().equals(cMeter.getUuid().toString())) {
-                                    Map<String, String> map = new HashMap<>();
-                                    map.put("name", cMeter.getName());
-                                    map.put("value", String.valueOf(ind.getValue()));
-                                    map.put("uuid", cMeter.getUuid().toString());
-                                    listForColdRecycler.add(map);
-                                    continue;
-                                }
-                            }
+                setupColdIndications(i, indList);
 
-                            for (Meter hMeter: hotMeterList) {
-                                if (ind.getMeterUuid().equals(hMeter.getUuid().toString())) {
-                                    Map<String, String> map = new HashMap<>();
-                                    map.put("name", hMeter.getName());
-                                    map.put("value", String.valueOf(ind.getValue()));
-                                    map.put("uuid", hMeter.getUuid().toString());
-                                    listForHotRecycler.add(map);
-                                    continue;
-                                }
-                            }
-
-
-                        //////////
-                    }
-                }
-                coldCurrentAdapter.setDataSet(listForColdRecycler);
-                coldCurrentAdapter.notifyDataSetChanged();
-                hotCurrentAdapter.setDataSet(listForHotRecycler);
-                hotCurrentAdapter.notifyDataSetChanged();
+                setupHotIndications(i, indList);
             }
 
             @Override
@@ -204,31 +189,50 @@ public class AddDialogFragment extends DialogFragment {
             }
         });
 
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SQLiteDatabase mDatabase = new BaseHelper(getContext()).getWritableDatabase();
+                List<Indication> coldIndList = coldCurrentAdapter.getIndicationsList();
+                List<Indication> hotIndList = hotCurrentAdapter.getIndicationsList();
+                coldIndList.size();
+                for (int k = 0; k < coldIndList.size(); k++) {
+                    Indication indication = findIndication(selectedYear,
+                            spinMonth.getSelectedItemPosition(),
+                            coldMeterList.get(k).getUuid().toString());
+                    if (indication!=null) {
+                        indication.setValue(coldIndList.get(k).getValue());
+                        mDatabase.update(DbSchema.IndTable.NAME, getContentValues(indication),
+                                DbSchema.IndTable.Cols.UUID + " = ?",
+                                new String[] {indication.getUuid().toString()});
+                    } else {
+                        coldIndList.get(k).setYear(selectedYear);
+                        coldIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
+                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(coldIndList.get(k)));
+                    }
+                }
+                for (int k = 0; k < hotIndList.size(); k++) {
+                    Indication indication = findIndication(selectedYear,
+                            spinMonth.getSelectedItemPosition(),
+                            hotMeterList.get(k).getUuid().toString());
+                    if (indication!=null) {
+                        indication.setValue(hotIndList.get(k).getValue());
+                        mDatabase.update(DbSchema.IndTable.NAME, getContentValues(indication),
+                                DbSchema.IndTable.Cols.UUID + " = ?",
+                                new String[] {indication.getUuid().toString()});
+                    } else {
+                        hotIndList.get(k).setYear(selectedYear);
+                        hotIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
+                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(hotIndList.get(k)));
+                    }
+                }
+
+                Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         dialog = new AlertDialog.Builder(getContext())
                 .setView(v)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SQLiteDatabase mDatabase = new BaseHelper(getContext()).getWritableDatabase();
-//                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(ind));
-                        List<Indication> coldIndList = coldCurrentAdapter.getIndicationsList();
-                        List<Indication> hotIndList = hotCurrentAdapter.getIndicationsList();
-                        coldIndList.size();
-                        for (int k=0; k<coldIndList.size(); k++) {
-                            coldIndList.get(k).setYear(selectedYear);
-                            coldIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
-                            mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(coldIndList.get(k)));
-                        }
-                        for (int k=0; k<hotIndList.size(); k++) {
-                            hotIndList.get(k).setYear(selectedYear);
-                            hotIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
-                            mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(hotIndList.get(k)));
-                        }
-
-                        Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
-                    }
-                })
                 .create();
         dialog.show();
         dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
@@ -237,8 +241,53 @@ public class AddDialogFragment extends DialogFragment {
         return dialog;
     }
 
+    private void setupHotIndications(int i, List<Indication> indList) {
+        listForHotRecycler.clear();
+        for (int j = 0; j < hotMeterList.size(); j++) {
+            Meter meter = hotMeterList.get(j);
+            Map<String, String> map = new HashMap<>();
+            map.put("name", meter.getName());
+            map.put("uuid", meter.getUuid().toString());
+            map.put("value", "0");
+
+            for (Indication ind : indList) {
+                if (ind.getYear() == selectedYear && ind.getMonth() == i) {
+                    if (ind.getMeterUuid().equals(meter.getUuid().toString())) {
+                        map.put("value", String.valueOf(ind.getValue()));
+                    }
+                }
+            }
+            listForHotRecycler.add(map);
+        }
+        hotCurrentAdapter.setDataSet(listForHotRecycler);
+        hotCurrentAdapter.notifyDataSetChanged();
+    }
+
+    private void setupColdIndications(int i, List<Indication> indList) {
+        listForColdRecycler.clear();
+        for (int j = 0; j < coldMeterList.size(); j++) {
+            Meter meter = coldMeterList.get(j);
+            Map<String, String> map = new HashMap<>();
+            map.put("name", meter.getName());
+            map.put("uuid", meter.getUuid().toString());
+            map.put("value", "0");
+
+            for (Indication ind : indList) {
+                if (ind.getYear() == selectedYear && ind.getMonth() == i) {
+                    if (ind.getMeterUuid().equals(meter.getUuid().toString())) {
+                        map.put("value", String.valueOf(ind.getValue()));
+                    }
+                }
+            }
+            listForColdRecycler.add(map);
+            coldCurrentAdapter.setDataSet(listForColdRecycler);
+            coldCurrentAdapter.notifyDataSetChanged();
+
+        }
+    }
+
     private void setupHotIndications() {
-        for (Meter meter:hotMeterList) {
+        for (Meter meter : hotMeterList) {
             Map<String, String> map = new HashMap<>();
             map.put("name", meter.getName());
             map.put("value", "0");
@@ -251,7 +300,7 @@ public class AddDialogFragment extends DialogFragment {
     }
 
     private void setupColdIndications() {
-        for (Meter meter:coldMeterList) {
+        for (Meter meter : coldMeterList) {
             Map<String, String> map = new HashMap<>();
             map.put("name", meter.getName());
             map.put("value", "0");
@@ -294,5 +343,18 @@ public class AddDialogFragment extends DialogFragment {
         values.put(DbSchema.IndTable.Cols.UUID, ind.getUuid().toString());
 
         return values;
+    }
+
+    private Indication findIndication(int year, int month, String meterUuid) {
+        Indication rez = null;
+        List<Indication> indList = Utils.getIndicationsList(0, getContext().getApplicationContext());
+        for (Indication indication: indList) {
+            if (indication.getMeterUuid().equals(meterUuid)) {
+                if (indication.getYear()==year && indication.getMonth() == month) {
+                    rez = indication;
+                }
+            }
+        }
+        return rez;
     }
 }

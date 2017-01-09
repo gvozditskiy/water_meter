@@ -69,6 +69,8 @@
     <string name="frag_add_month">Месяц</string>
     <string name="frag_add_year">Год</string>
     <string name="frag_add_flat">Квартира</string>
+    <string name="frag_add_add">Добавить показания</string>
+    <string name="frag_add_add_flat">Добавить показания для выбранной квартиры</string>
 
     <string-array name="streets">
         <item>Улица</item>
