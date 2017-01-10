@@ -2,8 +2,6 @@ package com.gvozditskiy.watermeter.activityNfragments;
 
 import android.app.Dialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,7 +15,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -62,8 +59,8 @@ public class AddDialogFragment extends DialogFragment {
         View v = getActivity().getLayoutInflater().inflate(R.layout.frag_dialog_add, null, false);
         Spinner spinYear = (Spinner) v.findViewById(R.id.frag_add_year_spinner);
         final Spinner spinMonth = (Spinner) v.findViewById(R.id.frag_add_month_spinner);
-        RecyclerView coldRcycler = (RecyclerView) v.findViewById(R.id.frag_add_coldwater_recycler);
-        RecyclerView hotRcycler = (RecyclerView) v.findViewById(R.id.frag_add_hotwater_recycler);
+        RecyclerView coldRcycler = (RecyclerView) v.findViewById(R.id.frag_enter_ind_cur_coldwater_recycler);
+        RecyclerView hotRcycler = (RecyclerView) v.findViewById(R.id.frag_enter_ind_cur_hotwater_recycler);
         AppCompatSpinner flatSpinner = (AppCompatSpinner) v.findViewById(R.id.frag_add_flat_spinner);
         final Button addBtn = (Button) v.findViewById(R.id.frag_add_btn);
 

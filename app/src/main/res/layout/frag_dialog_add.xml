@@ -13,7 +13,7 @@
         android:paddingBottom="0dp">
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/frag_add_coldwater_recycler"
+            android:id="@+id/frag_enter_ind_cur_coldwater_recycler"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="24dp"
@@ -42,7 +42,7 @@
             android:text="@string/frag_enter_ind_current_cold"
             android:textAlignment="center"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="@+id/frag_add_coldwater_recycler"
+            app:layout_constraintRight_toRightOf="@+id/frag_enter_ind_cur_coldwater_recycler"
             app:layout_constraintTop_toBottomOf="@+id/frag_add_flat_spinner" />
 
         <TextView
@@ -104,7 +104,7 @@
             app:layout_constraintTop_toBottomOf="@+id/frag_add_month_caption" />
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/frag_add_hotwater_recycler"
+            android:id="@+id/frag_enter_ind_cur_hotwater_recycler"
             android:layout_width="152dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -118,7 +118,7 @@
             android:paddingLeft="@dimen/editText_padding"
             app:layout_constraintLeft_toLeftOf="@+id/guideline1"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/frag_add_coldwater_recycler"
+            app:layout_constraintTop_toTopOf="@+id/frag_enter_ind_cur_coldwater_recycler"
             tools:ignore="RtlHardcoded,RtlSymmetry"
             tools:text="31" />
 
@@ -152,7 +152,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/frag_add_hotwater_recycler" />
+            app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_hotwater_recycler" />
 
     </android.support.constraint.ConstraintLayout>
     </ScrollView>

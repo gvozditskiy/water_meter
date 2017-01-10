@@ -18,47 +18,19 @@ import java.util.Map;
  * Created by Alexey on 04.01.2017.
  */
 
-public class ColdLastAdapter extends RecyclerView.Adapter<ColdLastAdapter.ColdLastVH> {
-    Context mContext;
-    /**
-     * Map<String, String> - map, в которой содержатся name счетчика и показание value
-     */
-    List<Map<String,String>> meters;
-
+public class ColdLastAdapter extends AbstractCurrentAdapter {
     public ColdLastAdapter(Context mContext) {
-        this.mContext = mContext;
+        super(mContext);
     }
 
-    public void setDataSet(List<Map<String, String>> list) {
-        meters=list;
+    public ColdLastAdapter(Context mContext, boolean vis) {
+        super(mContext, vis);
     }
 
     @Override
-    public ColdLastVH onCreateViewHolder(ViewGroup parent, int viewType) {
+    public CurrentVH onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.ind_last_cold_layout, parent, false);
-        return null;
-    }
-
-    @Override
-    public void onBindViewHolder(ColdLastVH holder, int position) {
-        holder.tv.setText(meters.get(position).get("name"));
-        holder.et.setText(meters.get(position).get("value"));
-    }
-
-    @Override
-    public int getItemCount() {
-        return meters.size();
-    }
-
-    public static class ColdLastVH extends RecyclerView.ViewHolder {
-        TextView tv;
-        EditText et;
-
-        public ColdLastVH(View itemView) {
-            super(itemView);
-            tv = (TextView) itemView.findViewById(R.id.ind_layout_tv);
-            et = (EditText) itemView.findViewById(R.id.ind_layout_et);
-        }
+        return new CurrentVH(v);
     }
 }
