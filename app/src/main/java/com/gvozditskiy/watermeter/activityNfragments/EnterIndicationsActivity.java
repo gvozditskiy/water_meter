@@ -58,19 +58,21 @@ public class EnterIndicationsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (hasPermission) {
-                    onSendListener.onSend();
-                } else {
-                    Snackbar.make(view, "Нет разрешения на отправку сообщений", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-//
-            }
-        });
+//        fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if (hasPermission) {
+//                    onSendListener.onSend();
+//                } else {
+//                    Snackbar.make(view, "Нет разрешения на отправку сообщений", Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
+//                }
+////
+//            }
+//        });
+//        fab.hide();
+//        fab.setVisibility(View.GONE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -190,7 +192,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
                 if (fragment!=null) {
                     ft.replace(R.id.content_enter_indications, fragment, TAG_INDFRAG);
                     ft.commit();
-                    fab.show();
+//                    fab.show();
                     mItemId = 0;
                     navigationView.setCheckedItem(R.id.nav_indications);
                 }
@@ -200,7 +202,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
                     ft.replace(R.id.content_enter_indications, fragment, TAG_STATFRAG);
 //                ft.addToBackStack(null);
                     ft.commit();
-                    fab.hide();
+//                    fab.hide();
                     mItemId = 1;
                     navigationView.setCheckedItem(R.id.nav_statistics);
                 }
@@ -296,7 +298,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
     @Override
     public void onRegisterInterface(OnSendListener onSendListener) {
         this.onSendListener = onSendListener;
-        fab.show();
+//        fab.show();
     }
 
     @Override

@@ -4,23 +4,16 @@ package com.gvozditskiy.watermeter.activityNfragments;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,13 +36,12 @@ import com.gvozditskiy.watermeter.Meter;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
-import com.gvozditskiy.watermeter.database.DbSchema;
-import com.gvozditskiy.watermeter.database.IndicationCursorWrapper;
 import com.gvozditskiy.watermeter.interfaces.OnSendListener;
 import com.gvozditskiy.watermeter.interfaces.OnTextChanged;
 import com.gvozditskiy.watermeter.interfaces.RegisterIntents;
 import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -67,6 +59,8 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     RecyclerView curColdRecycler;
     RecyclerView lastHotRecycler;
     RecyclerView curHotRecycler;
+    private TextView coldSumTv;
+    private TextView hotSumTv;
     private TextView summaryTv;
     private AppCompatSpinner spinner;
 
@@ -79,16 +73,24 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     int mMonth;
     int mDay;
 
+    int mColdSum;
+    int mHotSum;
+
     private RegisterInterface registerInterface;
     RegisterIntents registerIntents;
 
     List<Flat> flats = new ArrayList<>();
     List<Meter> coldMeters = new ArrayList<>();
     List<Meter> hotMeters = new ArrayList<>();
-    List<Map<String, String>> listForColdRecycler;
-    List<Map<String, String>> listForHotRecycler;
-    List<Map<String, String>> listForCurColdRecycler;
-    List<Map<String, String>> listForCurHotRecycler;
+    List<Map<String, String>> listForColdRecycler = new ArrayList<>();
+    List<Map<String, String>> listForHotRecycler = new ArrayList<>();
+    List<Map<String, String>> listForCurColdRecycler = new ArrayList<>();
+    List<Map<String, String>> listForCurHotRecycler = new ArrayList<>();
+
+    AbstractCurrentAdapter coldLastAdapter;
+    AbstractCurrentAdapter hotLastAdapter;
+    AbstractCurrentAdapter coldCurrentAdapter;
+    AbstractCurrentAdapter hotCurrentAdapter;
 
     public EneterIndicFragment() {
         // Required empty public constructor
@@ -132,7 +134,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable final Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         summaryTv = (TextView) view.findViewById(R.id.frag_enter_ind_summary);
         spinner = (AppCompatSpinner) view.findViewById(R.id.frag_enter_ind_spinner);
@@ -140,17 +142,88 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         lastHotRecycler = (RecyclerView) view.findViewById(R.id.frag_enter_ind_last_hotwater_recycler);
         curColdRecycler = (RecyclerView) view.findViewById(R.id.frag_enter_ind_cur_coldwater_recycler);
         curHotRecycler = (RecyclerView) view.findViewById(R.id.frag_enter_ind_cur_hotwater_recycler);
+        coldSumTv = (TextView) view.findViewById(R.id.frag_enter_ind_coldDelta);
+        hotSumTv = (TextView) view.findViewById(R.id.frag_enter_ind_hotDelta);
+
+
+
         lastColdRecycler.setLayoutManager(new LinearLayoutManager(mContext));
         lastHotRecycler.setLayoutManager(new LinearLayoutManager(mContext));
         curColdRecycler.setLayoutManager(new LinearLayoutManager(mContext));
         curHotRecycler.setLayoutManager(new LinearLayoutManager(mContext));
 
-        final AbstractCurrentAdapter coldLastAdapter = new ColdLastAdapter(mContext, false);
-        final AbstractCurrentAdapter hotLastAdapter = new HotLastAdapter(mContext, false);
-        final AbstractCurrentAdapter coldCurrentAdapter = new ColdCurrentAdapter(mContext, true);
-        final AbstractCurrentAdapter hotCurrentAdapter = new HotCurrentAdapter(mContext, true);
+        coldLastAdapter = new ColdLastAdapter(mContext, false);
+        hotLastAdapter = new HotLastAdapter(mContext, false);
+        coldCurrentAdapter = new ColdCurrentAdapter(mContext, true);
+        hotCurrentAdapter = new HotCurrentAdapter(mContext, true);
 
+        coldLastAdapter.setDataSet(listForColdRecycler);
+        hotLastAdapter.setDataSet(listForHotRecycler);
+        coldCurrentAdapter.setDataSet(listForCurColdRecycler);
+        hotCurrentAdapter.setDataSet(listForCurHotRecycler);
 
+        lastColdRecycler.setAdapter(coldLastAdapter);
+        lastHotRecycler.setAdapter(hotLastAdapter);
+        curColdRecycler.setAdapter(coldCurrentAdapter);
+        curHotRecycler.setAdapter(hotCurrentAdapter);
+
+        coldCurrentAdapter.setInterface(new OnTextChanged() {
+            @Override
+            public void onTextChanged() {
+                //считаем расход холодной воды
+                if (coldMeters.size()>1) {
+                    if (coldSumTv.getVisibility()==View.GONE) {
+                        coldSumTv.setVisibility(View.VISIBLE);
+                    }
+                    List<Indication> coldList = coldCurrentAdapter.getIndicationsList();
+                    int coldSum = 0;
+                    int lastColdSum = 0;
+                    for (Indication ind : coldList) {
+                        coldSum += ind.getValue();
+                    }
+                    List<Indication> lastColdList = getListForPreviousMonth(coldMeters);
+                    for (Indication ind : lastColdList) {
+                        lastColdSum += ind.getValue();
+                    }
+                    mColdSum = coldSum-lastColdSum;
+                    coldSumTv.setText(
+                            String.format(mContext.getString(R.string.frag_enter_ind_delta), mColdSum));
+                    summaryTv.setText(
+                            String.format(mContext.getString(R.string.frag_enter_ind_summary),
+                            mColdSum+ mHotSum)
+                    );
+                }
+            }
+        });
+
+        hotCurrentAdapter.setInterface(new OnTextChanged() {
+            @Override
+            public void onTextChanged() {
+                //считаем расход холодной воды
+                if (hotMeters.size()>1) {
+                    if (hotSumTv.getVisibility() == View.GONE) {
+                        hotSumTv.setVisibility(View.VISIBLE);
+                    }
+                    List<Indication> coldList = hotCurrentAdapter.getIndicationsList();
+                    int hotSum = 0;
+                    int lastHotSum = 0;
+                    for (Indication ind : coldList) {
+                        hotSum += ind.getValue();
+                    }
+                    List<Indication> lastHotList = getListForPreviousMonth(hotMeters);
+                    for (Indication ind : lastHotList) {
+                        lastHotSum += ind.getValue();
+                    }
+                    mHotSum = hotSum-lastHotSum;
+                    hotSumTv.setText(
+                            String.format(mContext.getString(R.string.frag_enter_ind_delta), mHotSum));
+                    summaryTv.setText(
+                            String.format(mContext.getString(R.string.frag_enter_ind_summary),
+                                    mColdSum+ mHotSum)
+                    );
+                }
+            }
+        });
 
 
         flats = Utils.getFlatList(mContext);
@@ -179,63 +252,42 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                         }
                     }
                 }
-                listForColdRecycler = getListForRecycler(coldMeters, 1);
-                listForHotRecycler = getListForRecycler(hotMeters, 1);
-                listForCurColdRecycler = getListForRecycler(coldMeters, 0);
-                listForCurHotRecycler = getListForRecycler(hotMeters, 0);
+                listForColdRecycler.clear();
+                listForHotRecycler.clear();
+                listForCurColdRecycler.clear();
+                listForCurHotRecycler.clear();
 
-                /**
-                 * если текущее значение меньше, чем предыдущее,
-                 * приравниваем текущее к предыдущему
-                 */
 
-//                for(int k=0; k<listForColdRecycler.size(); k++) {
-//                    int prevVal = Integer.parseInt(listForColdRecycler.get(k).get("value"));
-//                    int curVal = Integer.parseInt(listForCurColdRecycler.get(k).get("value"));
-//                    if (curVal<prevVal) {
-//                        listForCurColdRecycler.get(k).put("value", String.valueOf(prevVal));
-//                    }
-//                }
-//                for(int k=0; k<listForHotRecycler.size(); k++) {
-//                    int prevVal = Integer.parseInt(listForHotRecycler.get(k).get("value"));
-//                    int curVal = Integer.parseInt(listForCurHotRecycler.get(k).get("value"));
-//                    if (curVal<prevVal) {
-//                        listForCurHotRecycler.get(k).put("value", String.valueOf(prevVal));
-//                    }
-//                }
-// TODO: 10.01.2017 пересмотреть создание recycler 
+                    listForColdRecycler.addAll(getListForRecycler(coldMeters, 1));
+                    listForHotRecycler.addAll(getListForRecycler(hotMeters, 1));
+                if (savedInstanceState==null) {
+                    listForCurColdRecycler.addAll(getListForRecycler(coldMeters, 0));
+                    listForCurHotRecycler.addAll(getListForRecycler(hotMeters, 0));
+                } else {
+                    List<Indication> tCold= (List<Indication>) savedInstanceState.getSerializable("coldInd");
+                    List<Indication> tHot= (List<Indication>) savedInstanceState.getSerializable("hotInd");
+
+                    listForCurColdRecycler.addAll(getListForRecycler(coldMeters, tCold));
+                    listForCurHotRecycler.addAll(getListForRecycler(hotMeters, tHot));
+                }
+
                 coldLastAdapter.setDataSet(listForColdRecycler);
                 hotLastAdapter.setDataSet(listForHotRecycler);
                 coldCurrentAdapter.setDataSet(listForCurColdRecycler);
                 hotCurrentAdapter.setDataSet(listForCurHotRecycler);
-
-                lastColdRecycler.setAdapter(coldLastAdapter);
-                lastHotRecycler.setAdapter(hotLastAdapter);
-                curColdRecycler.setAdapter(coldCurrentAdapter);
-                curHotRecycler.setAdapter(hotCurrentAdapter);
 
                 coldLastAdapter.notifyDataSetChanged();
                 hotLastAdapter.notifyDataSetChanged();
                 coldCurrentAdapter.notifyDataSetChanged();
                 hotCurrentAdapter.notifyDataSetChanged();
 
-                coldCurrentAdapter.setInterface(new OnTextChanged() {
-                    @Override
-                    public void onTextChanged() {
-                        //считаем расход холодной воды
-                        List<Indication> coldList = coldCurrentAdapter.getIndicationsList();
-                        int coldSum = 0;
-                        int lastColdSum = 0;
-                        for (Indication ind: coldList) {
-                            coldSum+=ind.getValue();
-                        }
-                        List<Indication> lastColdList = getListForPreviousMonth(coldMeters);
-                        for (Indication ind: lastColdList) {
-                            lastColdSum+=ind.getValue();
-                        }
-                        Log.d("delta", String.valueOf(coldSum-lastColdSum));
-                    }
-                });
+                // TODO: 11.01.2017 разобраться, когда прятать 
+                if (coldSumTv.getVisibility()==View.VISIBLE) {
+                    coldSumTv.setVisibility(View.GONE);
+                }
+                if (hotSumTv.getVisibility() == View.VISIBLE) {
+                    hotSumTv.setVisibility(View.GONE);
+                }
 
             }
 
@@ -267,56 +319,13 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                 AddDialogFragment fragment = new AddDialogFragment();
                 fragment.show(fm, TAG_ADDFRAG);
                 return true;
+            case R.id.menu_add_send:
+                //// TODO: 11.01.2017 обработать отправку сообщения
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void initInd() {
-        boolean b = false; //показыывает, есть ли запись за предыдущий месяц
-
-        if (mDay > 10) {
-
-        } else if (mDay < 10) {
-
-        }
-
-        /*for (Indication ind : mIndList) {
-            if (mMonth == 0) {
-                if (ind.getYear() == mYear - 1) {
-                    if (ind.getMonth() == 11) {
-//                        lastCold.setText(String.valueOf(ind.getCold()));
-//                        lastHot.setText(String.valueOf(ind.getHot()));
-                        b = true;
-                    }
-                }
-            } else {
-                if (ind.getYear() == mYear) {
-                    if (ind.getMonth() == mMonth - 1) {
-//                        lastCold.setText(String.valueOf(ind.getCold()));
-//                        lastHot.setText(String.valueOf(ind.getHot()));
-                        b = true;
-                    }
-                }
-            }
-
-            if (ind.getYear() == mYear) {
-                if (ind.getMonth() == mMonth) {
-//                    if (mDay <= 10) {
-//                    curHot.setText(String.valueOf(ind.getHot()));
-//                    curCold.setText(String.valueOf(ind.getCold()));
-                    curCold.setFocusable(false);
-                    curCold.setCursorVisible(false);
-                    curHot.setFocusable(false);
-                    curHot.setCursorVisible(false);
-//                    }
-                }
-            }
-        }*/
-        if (!b) {
-
-        }
-
-    }
 
     private ContentValues getContentValues() {
         ContentValues values = new ContentValues();
@@ -355,6 +364,12 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         return values;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable("coldInd", (Serializable) coldCurrentAdapter.getIndicationsList());
+        outState.putSerializable("hotInd", (Serializable) hotCurrentAdapter.getIndicationsList());
+    }
 
     /**
      * реализация интерфейса
@@ -491,16 +506,48 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         return rezList;
     }
 
+    private List<Map<String, String>> getListForRecycler(List<Meter> list, List<Indication> inds) {
+        List<Map<String, String>> rezList = new ArrayList<>();
+        List<Indication> indications = Utils.getIndicationsList(0, mContext);
+        int year = mYear;
+        int month = mMonth;
+        if (month==0) {
+            year--;
+            month=11;
+        } else {
+            month=mMonth-1;
+        }
+for (int i=0; i<list.size(); i++) {
+    Map<String, String> map = new HashMap<>();
+    Meter meter = list.get(i);
+    map.put("name", meter.getName());
+    Indication indication = inds.get(i);
+    int lastValue=0;
+    for (Indication ind: indications) {
+        if (ind.getMeterUuid().equals(meter.getUuid().toString())) {
+            if (ind.getYear() == year && ind.getMonth() == month) {
+                lastValue = ind.getValue();
+            }
+        }
+    }
+    map.put("value", String.valueOf(indication.getValue()));
+    map.put("uuid", meter.getUuid().toString());
+    map.put("delta", String.valueOf(Math.abs(indication.getValue() - lastValue)));
+    rezList.add(map);
+}
+        return rezList;
+    }
+
     private List<Indication> getListForPreviousMonth(List<Meter> meters) {
         List<Indication> rezList = new ArrayList<>();
         List<Indication> indications = Utils.getIndicationsList(0, mContext);
         int year = mYear;
         int month;
-        if (mMonth==0) {
+        if (mMonth == 0) {
             year--;
             month = 11;
         } else {
-            month=mMonth-1;
+            month = mMonth - 1;
         }
 
         for (Meter meter : meters) {

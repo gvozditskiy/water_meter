@@ -1,285 +1,292 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.gvozditskiy.watermeter.activityNfragments.EneterIndicFragment">
+    android:layout_height="match_parent">
 
-    <!--////////выбор квартиры//////////-->
-    <android.support.v7.widget.CardView
-        android:id="@+id/frag_enter_ind_flatcard"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:paddingBottom="@dimen/activity_vertical_margin">
+        android:orientation="vertical"
+        tools:context="com.gvozditskiy.watermeter.activityNfragments.EneterIndicFragment">
 
-        <LinearLayout
+        <!--////////выбор квартиры//////////-->
+        <android.support.v7.widget.CardView
+            android:id="@+id/frag_enter_ind_flatcard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_margin="4dp"
             android:paddingBottom="@dimen/activity_vertical_margin">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/frag_enter_ind_flatselect_caption"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp"
-                android:textSize="@dimen/card_textview_marg" />
-
-            <android.support.v7.widget.AppCompatSpinner
-                android:id="@+id/frag_enter_ind_spinner"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:spinnerMode="dialog"/>
-
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
-
-    <!--/////////предыдушие показания/////////-->
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp">
-
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/activity_vertical_margin">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/frag_enter_ind_last_coldwater_recycler"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:maxHeight="200dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:maxLines="1"
-                android:paddingLeft="@dimen/editText_padding"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_last_cold"
-                tools:ignore="RtlHardcoded,RtlSymmetry"
-                tools:text="53" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/frag_enter_ind_last_hotwater_recycler"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:maxHeight="200dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="24dp"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:maxLines="1"
-                android:paddingLeft="@dimen/editText_padding"
-                app:layout_constraintLeft_toLeftOf="@+id/guideline"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/frag_enter_ind_last_coldwater_recycler"
-                tools:ignore="RtlHardcoded,RtlSymmetry"
-                tools:text="29" />
-
-            <TextView
-                android:id="@+id/frag_enter_ind_last_cold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/frag_enter_ind_current_cold"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_last" />
-
-            <TextView
-                android:id="@+id/frag_enter_ind_last"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/frag_enter_ind_last"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/frag_enter_ind_last_hot"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:text="@string/frag_enter_ind_current_hot"
-                app:layout_constraintBottom_toTopOf="@+id/frag_enter_ind_last_hotwater_recycler"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/frag_enter_ind_last_cold" />
-
-            <android.support.constraint.Guideline
-                android:id="@+id/guideline"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
                 android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.5"
-                tools:layout_editor_absoluteX="192dp"
-                tools:layout_editor_absoluteY="181dp" />
-        </android.support.constraint.ConstraintLayout>
-    </android.support.v7.widget.CardView>
+                android:paddingBottom="@dimen/activity_vertical_margin">
 
-    <!--///////////текущие показания//////////////-->
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:layout_marginTop="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/frag_enter_ind_flatselect_caption"
+                    android:textSize="@dimen/card_textview_marg" />
 
-        <android.support.constraint.ConstraintLayout
+                <android.support.v7.widget.AppCompatSpinner
+                    android:id="@+id/frag_enter_ind_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:spinnerMode="dialog" />
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <!--/////////предыдушие показания/////////-->
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/activity_vertical_margin">
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/frag_enter_ind_cur_coldwater_recycler"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:maxHeight="300dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="7dp"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:maxLines="1"
-                android:paddingLeft="@dimen/editText_padding"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/guideline1"
-                app:layout_constraintTop_toBottomOf="@+id/frag_add_current_cold"
-                tools:ignore="RtlHardcoded,RtlSymmetry"
-                tools:text="56"
-                app:layout_constraintHorizontal_bias="0.0" />
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="@dimen/activity_vertical_margin">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/frag_enter_ind_cur_hotwater_recycler"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:maxHeight="300dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="24dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="8dp"
-                android:ems="10"
-                android:inputType="numberDecimal"
-                android:maxLines="1"
-                android:paddingLeft="@dimen/editText_padding"
-                app:layout_constraintLeft_toLeftOf="@+id/guideline1"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/frag_add_current_hot"
-                tools:ignore="RtlHardcoded,RtlSymmetry"
-                tools:text="31" />
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/frag_enter_ind_last_coldwater_recycler"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="24dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:maxHeight="200dp"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/editText_padding"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@+id/guideline"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_last_cold"
+                    tools:ignore="RtlHardcoded,RtlSymmetry"
+                    tools:text="53" />
 
-            <TextView
-                android:id="@+id/frag_add_current_cold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="@string/frag_enter_ind_current_cold"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_current" />
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/frag_enter_ind_last_hotwater_recycler"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginLeft="24dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="24dp"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:maxHeight="200dp"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/editText_padding"
+                    app:layout_constraintLeft_toLeftOf="@+id/guideline"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/frag_enter_ind_last_coldwater_recycler"
+                    tools:ignore="RtlHardcoded,RtlSymmetry"
+                    tools:text="29" />
 
-            <TextView
-                android:id="@+id/frag_enter_ind_current"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/frag_enter_ind_current"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/frag_enter_ind_last_cold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/frag_enter_ind_current_cold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_last" />
 
-            <TextView
-                android:id="@+id/frag_add_current_hot"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:text="@string/frag_enter_ind_current_hot"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/frag_add_current_cold" />
+                <TextView
+                    android:id="@+id/frag_enter_ind_last"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/frag_enter_ind_last"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <android.support.constraint.Guideline
-                android:id="@+id/guideline1"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.5"
-                tools:layout_editor_absoluteX="192dp"
-                tools:layout_editor_absoluteY="440dp" />
+                <TextView
+                    android:id="@+id/frag_enter_ind_last_hot"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginLeft="24dp"
+                    android:layout_marginStart="24dp"
+                    android:text="@string/frag_enter_ind_current_hot"
+                    app:layout_constraintBottom_toTopOf="@+id/frag_enter_ind_last_hotwater_recycler"
+                    app:layout_constraintLeft_toLeftOf="@+id/guideline"
+                    app:layout_constraintTop_toTopOf="@+id/frag_enter_ind_last_cold"
+                    app:layout_constraintVertical_bias="0.0" />
 
-            <TextView
-                android:id="@+id/frag_enter_ind_coldDelta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintRight_toRightOf="@+id/frag_enter_ind_cur_coldwater_recycler"
-                app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_coldwater_recycler"
-                tools:text="+3 м3" />
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5"
+                    tools:layout_editor_absoluteX="192dp"
+                    tools:layout_editor_absoluteY="181dp" />
+            </android.support.constraint.ConstraintLayout>
+        </android.support.v7.widget.CardView>
 
-            <TextView
-                android:id="@+id/frag_enter_ind_hotDelta"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layout_constraintRight_toRightOf="@+id/frag_enter_ind_cur_hotwater_recycler"
-                app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_hotwater_recycler"
-                tools:text="+2 м3" />
+        <!--///////////текущие показания//////////////-->
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_marginTop="16dp">
 
-            <View
-                android:id="@+id/view"
-                style="@style/Divider"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_hotDelta" />
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="@dimen/activity_vertical_margin">
 
-            <TextView
-                android:id="@+id/frag_enter_ind_summary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view"
-                tools:text="Суммарный расход за текущий период 5 м3" />
-        </android.support.constraint.ConstraintLayout>
-    </android.support.v7.widget.CardView>
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/frag_enter_ind_cur_coldwater_recycler"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="24dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="7dp"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:maxHeight="300dp"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/editText_padding"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@+id/guideline1"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_add_current_cold"
+                    tools:ignore="RtlHardcoded,RtlSymmetry"
+                    tools:text="56" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/frag_enter_ind_cur_hotwater_recycler"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginLeft="24dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="8dp"
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:maxHeight="300dp"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/editText_padding"
+                    app:layout_constraintLeft_toLeftOf="@+id/guideline1"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_add_current_hot"
+                    tools:ignore="RtlHardcoded,RtlSymmetry"
+                    tools:text="31" />
+
+                <TextView
+                    android:id="@+id/frag_add_current_cold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/frag_enter_ind_current_cold"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_current" />
+
+                <TextView
+                    android:id="@+id/frag_enter_ind_current"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/frag_enter_ind_current"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/frag_add_current_hot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/frag_enter_ind_current_hot"
+                    app:layout_constraintTop_toTopOf="@+id/frag_add_current_cold"
+                    android:layout_marginLeft="24dp"
+                    app:layout_constraintLeft_toLeftOf="@+id/guideline1"
+                    android:layout_marginStart="24dp" />
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guideline1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5"
+                    tools:layout_editor_absoluteY="190dp"
+                    tools:layout_editor_absoluteX="192dp" />
+
+                <TextView
+                    android:id="@+id/frag_enter_ind_coldDelta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintLeft_toLeftOf="@+id/frag_enter_ind_cur_coldwater_recycler"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_coldwater_recycler"
+                    tools:text="+3 м3" />
+
+                <TextView
+                    android:id="@+id/frag_enter_ind_hotDelta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintLeft_toLeftOf="@+id/frag_enter_ind_cur_hotwater_recycler"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_hotwater_recycler"
+                    tools:text="+2 м3" />
+
+                <View
+                    android:id="@+id/view"
+                    style="@style/Divider"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="32dp"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_coldwater_recycler" />
+
+                <TextView
+                    android:id="@+id/frag_enter_ind_summary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/view"
+                    tools:text="Суммарный расход за текущий период 5 м3" />
+            </android.support.constraint.ConstraintLayout>
+        </android.support.v7.widget.CardView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

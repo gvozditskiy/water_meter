@@ -4,4 +4,8 @@
     <item android:title="Добавить показания"
         android:id="@+id/menu_add_add"
         app:showAsAction="never"/>
+    <item android:title="Отправить показания"
+        android:icon="@drawable/ic_sendsms"
+        android:id="@+id/menu_add_send"
+        app:showAsAction="ifRoom"/>
 </menu>

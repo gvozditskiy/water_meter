@@ -64,6 +64,7 @@ public abstract class AbstractCurrentAdapter extends RecyclerView.Adapter<Abstra
             indication.setMeterUuid(meters.get(i).get("uuid"));
             indication.setYear(mYear);
             indication.setMonth(mMonth);
+            indication.setValue(Integer.parseInt(list.get(i).get("value")));
             indications.add(i,indication);
         }
     }

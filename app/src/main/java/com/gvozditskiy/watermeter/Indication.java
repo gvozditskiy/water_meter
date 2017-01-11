@@ -1,12 +1,13 @@
 package com.gvozditskiy.watermeter;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  * Created by Alexey on 24.12.2016.
  */
 
-public class Indication {
+public class Indication implements Serializable {
     private int year;
     private int month;
     private int value;
