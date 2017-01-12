@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,6 +37,7 @@ import com.gvozditskiy.watermeter.Meter;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
+import com.gvozditskiy.watermeter.database.DbSchema;
 import com.gvozditskiy.watermeter.interfaces.OnSendListener;
 import com.gvozditskiy.watermeter.interfaces.OnTextChanged;
 import com.gvozditskiy.watermeter.interfaces.RegisterIntents;
@@ -175,23 +177,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                     if (coldSumTv.getVisibility()==View.GONE) {
                         coldSumTv.setVisibility(View.VISIBLE);
                     }
-                    List<Indication> coldList = coldCurrentAdapter.getIndicationsList();
-                    int coldSum = 0;
-                    int lastColdSum = 0;
-                    for (Indication ind : coldList) {
-                        coldSum += ind.getValue();
-                    }
-                    List<Indication> lastColdList = getListForPreviousMonth(coldMeters);
-                    for (Indication ind : lastColdList) {
-                        lastColdSum += ind.getValue();
-                    }
-                    mColdSum = coldSum-lastColdSum;
-                    coldSumTv.setText(
-                            String.format(mContext.getString(R.string.frag_enter_ind_delta), mColdSum));
-                    summaryTv.setText(
-                            String.format(mContext.getString(R.string.frag_enter_ind_summary),
-                            mColdSum+ mHotSum)
-                    );
+                    setColdDeltas();
                 }
             }
         });
@@ -204,23 +190,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                     if (hotSumTv.getVisibility() == View.GONE) {
                         hotSumTv.setVisibility(View.VISIBLE);
                     }
-                    List<Indication> coldList = hotCurrentAdapter.getIndicationsList();
-                    int hotSum = 0;
-                    int lastHotSum = 0;
-                    for (Indication ind : coldList) {
-                        hotSum += ind.getValue();
-                    }
-                    List<Indication> lastHotList = getListForPreviousMonth(hotMeters);
-                    for (Indication ind : lastHotList) {
-                        lastHotSum += ind.getValue();
-                    }
-                    mHotSum = hotSum-lastHotSum;
-                    hotSumTv.setText(
-                            String.format(mContext.getString(R.string.frag_enter_ind_delta), mHotSum));
-                    summaryTv.setText(
-                            String.format(mContext.getString(R.string.frag_enter_ind_summary),
-                                    mColdSum+ mHotSum)
-                    );
+                    setHotDeltas();
                 }
             }
         });
@@ -260,7 +230,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
 
                     listForColdRecycler.addAll(getListForRecycler(coldMeters, 1));
                     listForHotRecycler.addAll(getListForRecycler(hotMeters, 1));
-                if (savedInstanceState==null) {
+                if (savedInstanceState==null || savedInstanceState.getInt("flat")!=spinner.getSelectedItemPosition()) {
                     listForCurColdRecycler.addAll(getListForRecycler(coldMeters, 0));
                     listForCurHotRecycler.addAll(getListForRecycler(hotMeters, 0));
                 } else {
@@ -282,11 +252,31 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                 hotCurrentAdapter.notifyDataSetChanged();
 
                 // TODO: 11.01.2017 разобраться, когда прятать 
-                if (coldSumTv.getVisibility()==View.VISIBLE) {
-                    coldSumTv.setVisibility(View.GONE);
-                }
-                if (hotSumTv.getVisibility() == View.VISIBLE) {
-                    hotSumTv.setVisibility(View.GONE);
+                if (savedInstanceState==null) {
+//                    if (coldSumTv.getVisibility()==View.VISIBLE) {
+//                        coldSumTv.setVisibility(View.GONE);
+//                    }
+//                    if (hotSumTv.getVisibility() == View.VISIBLE) {
+//                        hotSumTv.setVisibility(View.GONE);
+//                    }
+                    if (coldMeters.size()<=1) {
+                        coldSumTv.setVisibility(View.GONE);
+                    }
+                    if (hotMeters.size()<=1) {
+                        hotSumTv.setVisibility(View.GONE);
+                    }
+                    setColdDeltas();
+                    setHotDeltas();
+                } else {
+                    int pos = savedInstanceState.getInt("flat",0);
+                    if (pos!=spinner.getSelectedItemPosition()) {
+                        coldSumTv.setVisibility(View.GONE);
+                        hotSumTv.setVisibility(View.GONE);
+                    } else {
+                        //обновить дельты
+                        setColdDeltas();
+                        setHotDeltas();
+                    }
                 }
 
             }
@@ -305,6 +295,46 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         registerInterface.onRegisterInterface(this);
     }
 
+    private void setHotDeltas() {
+        List<Indication> coldList = hotCurrentAdapter.getIndicationsList();
+        int hotSum = 0;
+        int lastHotSum = 0;
+        for (Indication ind : coldList) {
+            hotSum += ind.getValue();
+        }
+        List<Indication> lastHotList = getListForPreviousMonth(hotMeters);
+        for (Indication ind : lastHotList) {
+            lastHotSum += ind.getValue();
+        }
+        mHotSum = hotSum-lastHotSum;
+        hotSumTv.setText(
+                String.format(mContext.getString(R.string.frag_enter_ind_delta), mHotSum));
+        summaryTv.setText(
+                String.format(mContext.getString(R.string.frag_enter_ind_summary),
+                        mColdSum+ mHotSum)
+        );
+    }
+
+    private void setColdDeltas() {
+        List<Indication> coldList = coldCurrentAdapter.getIndicationsList();
+        int coldSum = 0;
+        int lastColdSum = 0;
+        for (Indication ind : coldList) {
+            coldSum += ind.getValue();
+        }
+        List<Indication> lastColdList = getListForPreviousMonth(coldMeters);
+        for (Indication ind : lastColdList) {
+            lastColdSum += ind.getValue();
+        }
+        mColdSum = coldSum-lastColdSum;
+        coldSumTv.setText(
+                String.format(mContext.getString(R.string.frag_enter_ind_delta), mColdSum));
+        summaryTv.setText(
+                String.format(mContext.getString(R.string.frag_enter_ind_summary),
+                mColdSum+ mHotSum)
+        );
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -320,46 +350,34 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                 fragment.show(fm, TAG_ADDFRAG);
                 return true;
             case R.id.menu_add_send:
-                //// TODO: 11.01.2017 обработать отправку сообщения
+                // TODO: 12.01.2017 добавить проверку, добавлены ли уже показания 
+                //добавляем показания в базу
+//                for (Indication indication: coldCurrentAdapter.getIndicationsList()) {
+//                    mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(indication));
+//                }
+//                for (Indication indication:hotCurrentAdapter.getIndicationsList()) {
+//                    mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(indication));
+//                }
+
+
+                //отправляем смс
+                new AlertDialog.Builder(mContext).
+                        setMessage(Utils.getMessageBody(mContext, coldCurrentAdapter.getIndicationsList(),
+                                hotCurrentAdapter.getIndicationsList(),
+                                flats.get(spinner.getSelectedItemPosition()))).show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
-    private ContentValues getContentValues() {
+    private ContentValues getContentValues(Indication indication) {
         ContentValues values = new ContentValues();
-        int curC = 0;
-//        if (!curCold.getText().toString().equals("")) {
-//            curC = Integer.parseInt(curCold.getText().toString());
-//        }
-//        int curH = 0;
-//        if (!curHot.getText().toString().equals("")) {
-//            curH = Integer.parseInt(curHot.getText().toString());
-//        }
-//
-//        int lastH = 0;
-//        if (!lastHot.getText().toString().equals("")) {
-//            lastH = Integer.parseInt(lastHot.getText().toString());
-//        }
-//        int lastC = 0;
-//        if (!lastCold.getText().toString().equals("")) {
-//            lastC = Integer.parseInt(lastCold.getText().toString());
-//        }
-
-//        if (curC >= lastC) {
-//            values.put(DbSchema.IndTable.Cols.COLD, curC);
-//        } else {
-//            return null;
-//        }
-
-//        if (curH >= lastH) {
-//            values.put(DbSchema.IndTable.Cols.HOT, curH);
-//        }
-//
-//
-//        values.put(DbSchema.IndTable.Cols.YEAR, mYear);
-//        values.put(DbSchema.IndTable.Cols.MONTH, mMonth);
+        values.put(DbSchema.IndTable.Cols.YEAR, indication.getYear());
+        values.put(DbSchema.IndTable.Cols.MONTH, indication.getMonth());
+        values.put(DbSchema.IndTable.Cols.UUID, indication.getUuid().toString());
+        values.put(DbSchema.IndTable.Cols.METER_UUID, indication.getMeterUuid());
+        values.put(DbSchema.IndTable.Cols.VALUE, indication.getValue());
 
         return values;
     }
@@ -369,6 +387,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         super.onSaveInstanceState(outState);
         outState.putSerializable("coldInd", (Serializable) coldCurrentAdapter.getIndicationsList());
         outState.putSerializable("hotInd", (Serializable) hotCurrentAdapter.getIndicationsList());
+        outState.putInt("flat", spinner.getSelectedItemPosition());
     }
 
     /**
@@ -376,35 +395,6 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
      */
     @Override
     public void onSend() {
-        final ContentValues contentValues = getContentValues();
-        boolean b = true;
-//        for (Indication ind : mIndList) {
-//            if (ind.getMonth() == mMonth) {
-//                Toast.makeText(getContext(), "Запись за текущий период уже добавлена", Toast.LENGTH_SHORT).show();
-//                b = false;
-////                return;
-//            }
-//        }
-
-        if (b) {
-            try {
-//                new AlertDialog.Builder(getContext())
-//                        .setTitle(getString(R.string.frag_enter_ind_title_warn))
-//                        .setMessage(String.format(getString(R.string.frag_enter_ind_message_warn), Utils.getMessageBody(getContext(),
-////                                Integer.parseInt(curCold.getText().toString()),
-////                                Integer.parseInt(curHot.getText().toString()))))
-//                        .setNegativeButton(android.R.string.cancel, null)
-//                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                ////////////
-//                            }
-//                        }).show();
-            } catch (Exception e) {
-                Toast.makeText(getContext(), "Показания счетчиков не отправлены. Проверьте введенные данные", Toast.LENGTH_SHORT).show();
-            }
-
-        }
 
 
     }

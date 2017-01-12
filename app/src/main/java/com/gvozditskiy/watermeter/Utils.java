@@ -35,18 +35,37 @@ public class Utils {
     private static SQLiteDatabase mDatabase;
 
 
-    public static String getMessageBody(Context context, int cold, int hot) {
+    public static String getMessageBody(Context context, List<Indication> coldIndList,
+            List<Indication> hotIndList, Flat flat) {
         StringBuilder sb = new StringBuilder();
-        SharedPreferences sp = context.getSharedPreferences(PREFS_PROFILE, Context.MODE_PRIVATE);
-        String name = (sp.getString(Utils.PREFS_PROFILE_NAME, ""));
-        String secName = (sp.getString(Utils.PREFS_PROFILE_SECNAME, ""));
-        String otch = (sp.getString(Utils.PREFS_PROFILE_OTCH, ""));
-        String street = (sp.getString(Utils.PREFS_PROFILE_STREET, ""));
-        String building = (sp.getString(Utils.PREFS_PROFILE_BUILDING, ""));
-        String flat = (sp.getString(Utils.PREFS_PROFILE_FLAT, ""));
+        //получаем Person из базы
+        Person person=null;
+        for (Person p: getPersonList(context)) {
+          if (p.getFlat_uuid().equals(flat.getUuid().toString())) {
+              person=p;
+          }
+        }
+        List<Meter> coldMeters = new ArrayList<>();
+        List<Meter> hotMeters = new ArrayList<>();
+        //получаем счетчики для квартиры из базы
+        for (Meter meter: getMeterLsit(context)) {
+            if (meter.getFlatUUID().equals(flat.getUuid().toString())) {
+                if (meter.getType().equals(Meter.TYPE_COLD)) {
+                    coldMeters.add(meter);
+                } else  {
+                    hotMeters.add(meter);
+                }
+            }
+        }
+
+        String name =person.getName();
+        String secName = person.getSurname();
+        String otch = person.getPatronymic();
+        String street = person.getStreet();
+        String building = person.getBuilding();
+        String flatS = person.getFlat();
         String[] array = context.getResources().getStringArray(R.array.streets);
-        int pos = sp.getInt(Utils.PREFS_PROFILE_STREET_TYPE, 0);
-        String type = array[pos];
+        String type = person.getsType();
         String soc = "";
         switch (type) {
             case "Улица":
@@ -72,15 +91,32 @@ public class Utils {
         sb.append(", д.");
         sb.append(building);
         sb.append(", кв.");
-        sb.append(flat);
+        sb.append(flatS);
         sb.append(" / ");
         sb.append(secName + " ");
         sb.append(name.charAt(0) + ".");
         sb.append(otch.charAt(0) + ". / ");
-        sb.append("хв - ");
-        sb.append(cold);
-        sb.append(" / гв - ");
-        sb.append(hot);
+        for (int i=0; i<coldMeters.size(); i++) {
+            for (Indication indication: coldIndList) {
+                if (indication.getMeterUuid().equals(coldMeters.get(i).getUuid().toString())) {
+                    sb.append(coldMeters.get(i).getName()+" - "+indication.getValue()+" / ");
+                }
+            }
+
+        }
+        for (int i=0; i<hotMeters.size(); i++) {
+            for (Indication indication: hotIndList) {
+                if (indication.getMeterUuid().equals(hotMeters.get(i).getUuid().toString())) {
+                    if (i!=hotMeters.size()-1) {
+                        sb.append(hotMeters.get(i).getName()+" - "+indication.getValue()+" / ");
+                    } else {
+                        sb.append(hotMeters.get(i).getName()+" - "+indication.getValue());
+                    }
+                }
+            }
+
+        }
+
         return sb.toString();
     }
 

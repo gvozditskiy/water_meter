@@ -14,17 +14,17 @@ public class Person implements Serializable {
     public static final String STYPE_PRLK = "Переулок";
     public static final String STYPE_PRZD = "Проезд";
     public static final String STYPE_BLVR = "Бульвар";
-    String surname;
-    String name;
-    String patronymic;
+    private String surname;
+    private String name;
+    private String patronymic;
 
-    String street;
-    String building;
-    String flat;
-    String flat_uuid;
+    private String street;
+    private String building;
+    private String flat;
+    private String flat_uuid;
 
-    String phone;
-    String sType;
+    private String phone;
+    private String sType;
 
     public Person() {
     }
