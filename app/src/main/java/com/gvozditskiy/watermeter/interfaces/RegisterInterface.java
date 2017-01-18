@@ -5,5 +5,5 @@ package com.gvozditskiy.watermeter.interfaces;
  */
 
 public interface RegisterInterface {
-    void  onRegisterInterface(OnSendListener onSendListener);
+    void  onRegisterInterface(SendErrorCallback sendErrorCallback);
 }

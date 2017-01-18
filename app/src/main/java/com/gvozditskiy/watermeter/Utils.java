@@ -36,29 +36,29 @@ public class Utils {
 
 
     public static String getMessageBody(Context context, List<Indication> coldIndList,
-            List<Indication> hotIndList, Flat flat) {
+                                        List<Indication> hotIndList, Flat flat) {
         StringBuilder sb = new StringBuilder();
         //получаем Person из базы
-        Person person=null;
-        for (Person p: getPersonList(context)) {
-          if (p.getFlat_uuid().equals(flat.getUuid().toString())) {
-              person=p;
-          }
+        Person person = null;
+        for (Person p : getPersonList(context)) {
+            if (p.getFlat_uuid().equals(flat.getUuid().toString())) {
+                person = p;
+            }
         }
         List<Meter> coldMeters = new ArrayList<>();
         List<Meter> hotMeters = new ArrayList<>();
         //получаем счетчики для квартиры из базы
-        for (Meter meter: getMeterLsit(context)) {
+        for (Meter meter : getMeterLsit(context)) {
             if (meter.getFlatUUID().equals(flat.getUuid().toString())) {
                 if (meter.getType().equals(Meter.TYPE_COLD)) {
                     coldMeters.add(meter);
-                } else  {
+                } else {
                     hotMeters.add(meter);
                 }
             }
         }
 
-        String name =person.getName();
+        String name = person.getName();
         String secName = person.getSurname();
         String otch = person.getPatronymic();
         String street = person.getStreet();
@@ -96,21 +96,21 @@ public class Utils {
         sb.append(secName + " ");
         sb.append(name.charAt(0) + ".");
         sb.append(otch.charAt(0) + ". / ");
-        for (int i=0; i<coldMeters.size(); i++) {
-            for (Indication indication: coldIndList) {
+        for (int i = 0; i < coldMeters.size(); i++) {
+            for (Indication indication : coldIndList) {
                 if (indication.getMeterUuid().equals(coldMeters.get(i).getUuid().toString())) {
-                    sb.append(coldMeters.get(i).getName()+" - "+indication.getValue()+" / ");
+                    sb.append(coldMeters.get(i).getName() + " - " + indication.getValue() + " / ");
                 }
             }
 
         }
-        for (int i=0; i<hotMeters.size(); i++) {
-            for (Indication indication: hotIndList) {
+        for (int i = 0; i < hotMeters.size(); i++) {
+            for (Indication indication : hotIndList) {
                 if (indication.getMeterUuid().equals(hotMeters.get(i).getUuid().toString())) {
-                    if (i!=hotMeters.size()-1) {
-                        sb.append(hotMeters.get(i).getName()+" - "+indication.getValue()+" / ");
+                    if (i != hotMeters.size() - 1) {
+                        sb.append(hotMeters.get(i).getName() + " - " + indication.getValue() + " / ");
                     } else {
-                        sb.append(hotMeters.get(i).getName()+" - "+indication.getValue());
+                        sb.append(hotMeters.get(i).getName() + " - " + indication.getValue());
                     }
                 }
             }
@@ -226,6 +226,7 @@ public class Utils {
 
     /**
      * возвращает список квартир
+     *
      * @param context
      * @return
      */
@@ -238,7 +239,7 @@ public class Utils {
                 flats.add(cursor.getFlat());
                 cursor.moveToNext();
             }
-        }finally {
+        } finally {
             cursor.close();
         }
         return flats;
@@ -246,12 +247,13 @@ public class Utils {
 
     /**
      * Возвращает список плательщиков
+     *
      * @param context
      * @return
      */
     public static List<Person> getPersonList(Context context) {
         List<Person> persons = new ArrayList<>();
-        PersonCursorWrapper cursor = queryPerson(context, null,null );
+        PersonCursorWrapper cursor = queryPerson(context, null, null);
         cursor.moveToFirst();
         try {
             while (!cursor.isAfterLast()) {
@@ -266,7 +268,7 @@ public class Utils {
 
     public static List<Meter> getMeterLsit(Context context) {
         List<Meter> meters = new ArrayList<>();
-        MeterCursorWrapper cursor = queryMeter(context, null,null);
+        MeterCursorWrapper cursor = queryMeter(context, null, null);
         cursor.moveToFirst();
         try {
             while (!cursor.isAfterLast()) {
@@ -277,5 +279,32 @@ public class Utils {
             cursor.close();
         }
         return meters;
+    }
+
+    public static void deleteIndications(Context context, String flatID, int year, int month) {
+        List<Meter> meters = new ArrayList<>();
+        for (Meter meter : getMeterLsit(context)) {
+            if (meter.getFlatUUID().equals(flatID)) {
+                meters.add(meter);
+            }
+        }
+        List<Indication> fullIndList = getIndicationsList(0, context);
+        List<Indication> inds = new ArrayList<>();
+        for (Meter meter : meters) {
+            for (Indication ind : fullIndList) {
+                if (ind.getYear() == year &&
+                        ind.getMonth() == month &&
+                        ind.getMeterUuid().equals(meter.getUuid().toString())) {
+                    inds.add(ind);
+                }
+            }
+        }
+
+        SQLiteDatabase database = new BaseHelper(context).getWritableDatabase();
+        for (Indication ind : inds) {
+            database.delete(DbSchema.IndTable.NAME, DbSchema.IndTable.Cols.UUID + " = "
+                    , new String[]{ind.getUuid().toString()});
+        }
+
     }
 }

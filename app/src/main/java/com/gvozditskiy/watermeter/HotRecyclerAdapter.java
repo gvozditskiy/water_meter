@@ -51,7 +51,11 @@ public class HotRecyclerAdapter extends RecyclerView.Adapter<HotRecyclerAdapter.
 
     @Override
     public void onBindViewHolder(VH holder, final int position) {
-        holder.nameText.setText(meterList.get(position).getName().toString());
+        try {
+            holder.nameText.setText(meterList.get(position).getName().toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         holder.delBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

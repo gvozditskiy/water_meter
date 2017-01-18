@@ -626,7 +626,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            coldMeterList.add(new Meter("ХВ1", Meter.TYPE_COLD, flatUuid));
+            coldMeterList.add(new Meter("ХВ", Meter.TYPE_COLD, flatUuid));
         }
         coldAdapter = new ColdRecyclerAdapter(getContext(), coldMeterList);
 //        coldMeterList.add(new Meter("ХВ2", Meter.TYPE_COLD, "ghh"));
@@ -634,6 +634,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             @Override
             public void onClick(int i) {
                 coldMeterList.remove(i);
+                if (coldMeterList.size()==1) {
+                    coldMeterList.get(0).setName("ХВ");
+                    coldAdapter.notifyItemChanged(0);
+                }
 //                coldAdapter.notifyDataSetChanged();
                 coldAdapter.notifyItemRemoved(i);
                 coldAdapter.notifyItemRangeChanged(i, coldMeterList.size() - i);
@@ -656,7 +660,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            hotMeterList.add(new Meter("ГВ1", Meter.TYPE_HOT, flatUuid));
+            hotMeterList.add(new Meter("ГВ", Meter.TYPE_HOT, flatUuid));
         }
         hotAdapter = new HotRecyclerAdapter(getContext(), hotMeterList);
 //        hotMeterList.add(new Meter("ГВ2", Meter.TYPE_HOT, "ghh"));
@@ -665,6 +669,10 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             @Override
             public void onClick(int i) {
                 hotMeterList.remove(i);
+                if (hotMeterList.size()==1) {
+                    hotMeterList.get(0).setName("ГВ");
+                    hotAdapter.notifyItemChanged(0);
+                }
                 hotAdapter.notifyItemRemoved(i);
                 hotAdapter.notifyItemRangeChanged(i, hotMeterList.size() - i);
 

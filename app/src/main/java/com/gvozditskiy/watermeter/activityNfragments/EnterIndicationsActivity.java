@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -26,11 +25,10 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.gvozditskiy.watermeter.R;
-import com.gvozditskiy.watermeter.interfaces.OnSendListener;
+import com.gvozditskiy.watermeter.interfaces.SendErrorCallback;
 import com.gvozditskiy.watermeter.interfaces.RegisterIntents;
 import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
 
@@ -42,7 +40,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
     private final static String TAG_STATFRAG = "StatisticsFragment";
     private final static String TAG_ABOUTFRAG = "AboutFragment";
     public static final int PERMISSION_REQ = 101;
-    OnSendListener onSendListener;
+    SendErrorCallback sendErrorCallback;
     FloatingActionButton fab;
     private int mItemId;
     boolean hasBundle;
@@ -63,7 +61,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
 //            @Override
 //            public void onClick(View view) {
 //                if (hasPermission) {
-//                    onSendListener.onSend();
+//                    sendErrorCallback.onSend();
 //                } else {
 //                    Snackbar.make(view, "Нет разрешения на отправку сообщений", Snackbar.LENGTH_LONG)
 //                            .setAction("Action", null).show();
@@ -107,16 +105,19 @@ public class EnterIndicationsActivity extends AppCompatActivity
                         break;
                     case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
                         Toast.makeText(context, "Generic failure cause", Toast.LENGTH_SHORT).show();
-
+                        sendErrorCallback.onSend();
                         break;
                     case SmsManager.RESULT_ERROR_NO_SERVICE:
                         Toast.makeText(context, "Service is currently unavailable", Toast.LENGTH_SHORT).show();
+                        sendErrorCallback.onSend();
                         break;
                     case SmsManager.RESULT_ERROR_NULL_PDU:
                         Toast.makeText(context, "No pdu provided", Toast.LENGTH_SHORT).show();
+                        sendErrorCallback.onSend();
                         break;
                     case SmsManager.RESULT_ERROR_RADIO_OFF:
                         Toast.makeText(context, "Radio was explicitly turned off", Toast.LENGTH_SHORT).show();
+                        sendErrorCallback.onSend();
                         break;
                 }
             }
@@ -132,6 +133,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
                         break;
                     case Activity.RESULT_CANCELED:
                         Toast.makeText(getBaseContext(), "SMS not delivered", Toast.LENGTH_SHORT).show();
+                        sendErrorCallback.onSend();
                         break;
                 }
             }
@@ -296,8 +298,8 @@ public class EnterIndicationsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRegisterInterface(OnSendListener onSendListener) {
-        this.onSendListener = onSendListener;
+    public void onRegisterInterface(SendErrorCallback sendErrorCallback) {
+        this.sendErrorCallback = sendErrorCallback;
 //        fab.show();
     }
 

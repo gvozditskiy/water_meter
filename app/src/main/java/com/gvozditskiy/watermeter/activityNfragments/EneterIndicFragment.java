@@ -4,6 +4,7 @@ package com.gvozditskiy.watermeter.activityNfragments;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -34,11 +35,12 @@ import com.gvozditskiy.watermeter.IndAdapters.HotCurrentAdapter;
 import com.gvozditskiy.watermeter.IndAdapters.HotLastAdapter;
 import com.gvozditskiy.watermeter.Indication;
 import com.gvozditskiy.watermeter.Meter;
+import com.gvozditskiy.watermeter.Person;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
 import com.gvozditskiy.watermeter.database.DbSchema;
-import com.gvozditskiy.watermeter.interfaces.OnSendListener;
+import com.gvozditskiy.watermeter.interfaces.SendErrorCallback;
 import com.gvozditskiy.watermeter.interfaces.OnTextChanged;
 import com.gvozditskiy.watermeter.interfaces.RegisterIntents;
 import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
@@ -55,7 +57,7 @@ import java.util.Map;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EneterIndicFragment extends Fragment implements OnSendListener {
+public class EneterIndicFragment extends Fragment implements SendErrorCallback {
     private static final String TAG_ADDFRAG = "AddDialogFragment";
     RecyclerView lastColdRecycler;
     RecyclerView curColdRecycler;
@@ -148,7 +150,6 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         hotSumTv = (TextView) view.findViewById(R.id.frag_enter_ind_hotDelta);
 
 
-
         lastColdRecycler.setLayoutManager(new LinearLayoutManager(mContext));
         lastHotRecycler.setLayoutManager(new LinearLayoutManager(mContext));
         curColdRecycler.setLayoutManager(new LinearLayoutManager(mContext));
@@ -173,8 +174,8 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
             @Override
             public void onTextChanged() {
                 //считаем расход холодной воды
-                if (coldMeters.size()>1) {
-                    if (coldSumTv.getVisibility()==View.GONE) {
+                if (coldMeters.size() > 1) {
+                    if (coldSumTv.getVisibility() == View.GONE) {
                         coldSumTv.setVisibility(View.VISIBLE);
                     }
                     setColdDeltas();
@@ -186,7 +187,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
             @Override
             public void onTextChanged() {
                 //считаем расход холодной воды
-                if (hotMeters.size()>1) {
+                if (hotMeters.size() > 1) {
                     if (hotSumTv.getVisibility() == View.GONE) {
                         hotSumTv.setVisibility(View.VISIBLE);
                     }
@@ -228,14 +229,14 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                 listForCurHotRecycler.clear();
 
 
-                    listForColdRecycler.addAll(getListForRecycler(coldMeters, 1));
-                    listForHotRecycler.addAll(getListForRecycler(hotMeters, 1));
-                if (savedInstanceState==null || savedInstanceState.getInt("flat")!=spinner.getSelectedItemPosition()) {
+                listForColdRecycler.addAll(getListForRecycler(coldMeters, 1));
+                listForHotRecycler.addAll(getListForRecycler(hotMeters, 1));
+                if (savedInstanceState == null || savedInstanceState.getInt("flat") != spinner.getSelectedItemPosition()) {
                     listForCurColdRecycler.addAll(getListForRecycler(coldMeters, 0));
                     listForCurHotRecycler.addAll(getListForRecycler(hotMeters, 0));
                 } else {
-                    List<Indication> tCold= (List<Indication>) savedInstanceState.getSerializable("coldInd");
-                    List<Indication> tHot= (List<Indication>) savedInstanceState.getSerializable("hotInd");
+                    List<Indication> tCold = (List<Indication>) savedInstanceState.getSerializable("coldInd");
+                    List<Indication> tHot = (List<Indication>) savedInstanceState.getSerializable("hotInd");
 
                     listForCurColdRecycler.addAll(getListForRecycler(coldMeters, tCold));
                     listForCurHotRecycler.addAll(getListForRecycler(hotMeters, tHot));
@@ -252,24 +253,24 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                 hotCurrentAdapter.notifyDataSetChanged();
 
                 // TODO: 11.01.2017 разобраться, когда прятать 
-                if (savedInstanceState==null) {
+                if (savedInstanceState == null) {
 //                    if (coldSumTv.getVisibility()==View.VISIBLE) {
 //                        coldSumTv.setVisibility(View.GONE);
 //                    }
 //                    if (hotSumTv.getVisibility() == View.VISIBLE) {
 //                        hotSumTv.setVisibility(View.GONE);
 //                    }
-                    if (coldMeters.size()<=1) {
+                    if (coldMeters.size() <= 1) {
                         coldSumTv.setVisibility(View.GONE);
                     }
-                    if (hotMeters.size()<=1) {
+                    if (hotMeters.size() <= 1) {
                         hotSumTv.setVisibility(View.GONE);
                     }
                     setColdDeltas();
                     setHotDeltas();
                 } else {
-                    int pos = savedInstanceState.getInt("flat",0);
-                    if (pos!=spinner.getSelectedItemPosition()) {
+                    int pos = savedInstanceState.getInt("flat", 0);
+                    if (pos != spinner.getSelectedItemPosition()) {
                         coldSumTv.setVisibility(View.GONE);
                         hotSumTv.setVisibility(View.GONE);
                     } else {
@@ -306,12 +307,12 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         for (Indication ind : lastHotList) {
             lastHotSum += ind.getValue();
         }
-        mHotSum = hotSum-lastHotSum;
+        mHotSum = hotSum - lastHotSum;
         hotSumTv.setText(
                 String.format(mContext.getString(R.string.frag_enter_ind_delta), mHotSum));
         summaryTv.setText(
                 String.format(mContext.getString(R.string.frag_enter_ind_summary),
-                        mColdSum+ mHotSum)
+                        mColdSum + mHotSum)
         );
     }
 
@@ -326,12 +327,12 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         for (Indication ind : lastColdList) {
             lastColdSum += ind.getValue();
         }
-        mColdSum = coldSum-lastColdSum;
+        mColdSum = coldSum - lastColdSum;
         coldSumTv.setText(
                 String.format(mContext.getString(R.string.frag_enter_ind_delta), mColdSum));
         summaryTv.setText(
                 String.format(mContext.getString(R.string.frag_enter_ind_summary),
-                mColdSum+ mHotSum)
+                        mColdSum + mHotSum)
         );
     }
 
@@ -350,21 +351,55 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
                 fragment.show(fm, TAG_ADDFRAG);
                 return true;
             case R.id.menu_add_send:
-                // TODO: 12.01.2017 добавить проверку, добавлены ли уже показания 
-                //добавляем показания в базу
-//                for (Indication indication: coldCurrentAdapter.getIndicationsList()) {
-//                    mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(indication));
-//                }
-//                for (Indication indication:hotCurrentAdapter.getIndicationsList()) {
-//                    mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(indication));
-//                }
+                // TODO: 12.01.2017 добавить проверку, добавлены ли уже показания
+                List<Indication> indList = Utils.getIndicationsList(0, getContext());
+                boolean b = false;
+                List<Meter> mList = new ArrayList<>();
+                mList.addAll(coldMeters);
+                mList.addAll(hotMeters);
+                for (Meter meter : mList) {
+                    if (meter.getFlatUUID().equals(flats.get(spinner.getSelectedItemPosition()).getUuid().toString())) {
+                        for (Indication ind : indList) {
+                            if (ind.getYear() == mYear
+                                    && ind.getMonth() == mMonth
+                                    && ind.getMeterUuid().equals(meter.getUuid().toString())) {
+                                b = true;
+//                                break;
+                            }
+                        }
+                    }
+                }
+                if (b) {
+                    Toast.makeText(getContext(), getString(R.string.frag_enter_ind_present_message), Toast.LENGTH_SHORT).show();
+                } else {
+                    //добавляем показания в базу
+                    for (Indication indication : coldCurrentAdapter.getIndicationsList()) {
+                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(indication));
+                    }
+                    for (Indication indication : hotCurrentAdapter.getIndicationsList()) {
+                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(indication));
+                    }
+                    //отправляем смс
+                    try {
+                        new AlertDialog.Builder(mContext)
+                                .setTitle("Отправить показания?")
+                                .setMessage(Utils.getMessageBody(mContext, coldCurrentAdapter.getIndicationsList(),
+                                        hotCurrentAdapter.getIndicationsList(),
+                                        flats.get(spinner.getSelectedItemPosition())))
+                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        if (sendSMS()) {
+
+                                        }
+                                    }
+                                }).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
 
-                //отправляем смс
-                new AlertDialog.Builder(mContext).
-                        setMessage(Utils.getMessageBody(mContext, coldCurrentAdapter.getIndicationsList(),
-                                hotCurrentAdapter.getIndicationsList(),
-                                flats.get(spinner.getSelectedItemPosition()))).show();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -395,17 +430,22 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
      */
     @Override
     public void onSend() {
-
-
+        Utils.deleteIndications(getContext(),
+                flats.get(spinner.getSelectedItemPosition()).getUuid().toString(),
+                mYear, mMonth);
     }
 
-    private void sendSMS() {
-        String phoneNumber = "+" + Utils.getPhone(getContext());
-//        String smsBody = Utils.getMessageBody(
-//                getContext(),
-//                Integer.parseInt(curCold.getText().toString()),
-//                Integer.parseInt(curHot.getText().toString())
-//);
+    private boolean sendSMS() {
+        String phoneNumber = "+";
+        for (Person person : Utils.getPersonList(getContext())) {
+            if (flats.get(spinner.getSelectedItemPosition()).getUuid().toString().equals(person.getFlat_uuid())) {
+                phoneNumber += person.getPhone();
+            }
+        }
+
+        String smsBody = Utils.getMessageBody(
+                getContext(), coldCurrentAdapter.getIndicationsList(),
+                hotCurrentAdapter.getIndicationsList(), flats.get(spinner.getSelectedItemPosition()));
 
 
         String SMS_SENT = "SMS_SENT";
@@ -417,7 +457,7 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         registerIntents.onRegisterIntent(sentPendingIntent, deliveredPendingIntent);
 
         SmsManager smsManager = SmsManager.getDefault();
-//        ArrayList<String> texts = smsManager.divideMessage(smsBody);
+        ArrayList<String> texts = smsManager.divideMessage(smsBody);
         ArrayList<PendingIntent> sentPendingIntents = new ArrayList<PendingIntent>();
         ArrayList<PendingIntent> deliveredPendingIntents = new ArrayList<PendingIntent>();
 
@@ -426,24 +466,18 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
 //            deliveredPendingIntents.add(deliveredPendingIntent);
 //        }
 
-//        if (!phoneNumber.equals("") && !smsBody.equals("")) {
-////            if (texts.size()==1) {
-////                smsManager.sendTextMessage(phoneNumber, null, smsBody, sentPendingIntent, deliveredPendingIntent);
-////            } else {
-////                smsManager.sendMultipartTextMessage(phoneNumber, null, texts, null, null);
-////            }
-//            smsManager.sendMultipartTextMessage(phoneNumber, null, texts, sentPendingIntents, deliveredPendingIntents);
-//
-//        } else {
-//            Toast.makeText(getContext(), "Показания счетчиков не отправлены. Проверьте введенные данные", Toast.LENGTH_SHORT).show();
-//        }
+        if (!phoneNumber.equals("+") && !smsBody.equals("")) {
+            if (texts.size() >= 1) {
+                smsManager.sendTextMessage(phoneNumber, null, smsBody, sentPendingIntent, deliveredPendingIntent);
+            } else {
+                smsManager.sendMultipartTextMessage(phoneNumber, null, texts, sentPendingIntents, deliveredPendingIntents);
+            }
+            return true;
+        } else {
+            Toast.makeText(getContext(), "Показания счетчиков не отправлены. Проверьте введенные данные", Toast.LENGTH_SHORT).show();
+            return false;
+        }
 
-//        Toast.makeText(getContext(),
-//                Utils.getMessageBody(
-//                        getContext(),
-//                        Integer.parseInt(curCold.getText().toString()),
-//                        Integer.parseInt(curHot.getText().toString())),
-//                Toast.LENGTH_LONG).show();
     }
 
     private List<Map<String, String>> getListForRecycler(List<Meter> list, int i) {
@@ -501,30 +535,30 @@ public class EneterIndicFragment extends Fragment implements OnSendListener {
         List<Indication> indications = Utils.getIndicationsList(0, mContext);
         int year = mYear;
         int month = mMonth;
-        if (month==0) {
+        if (month == 0) {
             year--;
-            month=11;
+            month = 11;
         } else {
-            month=mMonth-1;
+            month = mMonth - 1;
         }
-for (int i=0; i<list.size(); i++) {
-    Map<String, String> map = new HashMap<>();
-    Meter meter = list.get(i);
-    map.put("name", meter.getName());
-    Indication indication = inds.get(i);
-    int lastValue=0;
-    for (Indication ind: indications) {
-        if (ind.getMeterUuid().equals(meter.getUuid().toString())) {
-            if (ind.getYear() == year && ind.getMonth() == month) {
-                lastValue = ind.getValue();
+        for (int i = 0; i < list.size(); i++) {
+            Map<String, String> map = new HashMap<>();
+            Meter meter = list.get(i);
+            map.put("name", meter.getName());
+            Indication indication = inds.get(i);
+            int lastValue = 0;
+            for (Indication ind : indications) {
+                if (ind.getMeterUuid().equals(meter.getUuid().toString())) {
+                    if (ind.getYear() == year && ind.getMonth() == month) {
+                        lastValue = ind.getValue();
+                    }
+                }
             }
+            map.put("value", String.valueOf(indication.getValue()));
+            map.put("uuid", meter.getUuid().toString());
+            map.put("delta", String.valueOf(Math.abs(indication.getValue() - lastValue)));
+            rezList.add(map);
         }
-    }
-    map.put("value", String.valueOf(indication.getValue()));
-    map.put("uuid", meter.getUuid().toString());
-    map.put("delta", String.valueOf(Math.abs(indication.getValue() - lastValue)));
-    rezList.add(map);
-}
         return rezList;
     }
 
