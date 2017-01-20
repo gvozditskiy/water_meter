@@ -56,5 +56,8 @@ public class Flat implements Serializable {
         this.uuid = uuid;
     }
 
-
+    @Override
+    public String toString() {
+        return getUuid().toString();
+    }
 }

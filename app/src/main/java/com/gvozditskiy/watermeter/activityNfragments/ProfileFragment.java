@@ -149,7 +149,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 fragment.setOnUpdateListener(new OnUpdate() {
                     @Override
                     public void onUpdate() {
-                        setUpRadioGroup(savedInstanceState);
+                        setUpRadioGroup(null);
 
                     }
                 });
@@ -278,7 +278,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             db.insert(FlatsTable.NAME, null, cv);
         }
         int id = 0;
+
         radioGroup.removeAllViews();
+        
         for (Flat flat : flatList) {
             RadioButton rBtn = new RadioButton(getContext());
             RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(150, 150);
@@ -341,14 +343,16 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     private void setupFlat() {
         Log.d(TAG_LOG, "setupFlat");
         int pos = radioGroup.getCheckedRadioButtonId();
-        Person person;
-
-
+        Person person = new Person("","","","","","","","","");
 
         if (pos < savedPage.size() && savedPage.size() != 0)
         {
             Map map = savedPage.get(pos);
-            person = Person.personFromMap((Map<String, String>) map.get("person"));
+            try {
+                person = Person.personFromMap((Map<String, String>) map.get("person"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Bundle tempBundle = new Bundle();
             tempBundle.putSerializable("cold", (Serializable) map.get("cold"));
             tempBundle.putSerializable("hot", (Serializable) map.get("hot"));
@@ -377,18 +381,32 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
     }
 
     private void loadFlatDataFromDb() {
+        // TODO: 19.01.2017 хрень при первом запуске! 
         List<Flat> flatsFromDB = Utils.getFlatList(getContext());
         List<Person> pListFromDB = Utils.getPersonList(getContext());
         List<Meter> metersFromDB = Utils.getMeterLsit(getContext());
+
+        savedPage.clear();
         int flatI = 0;
         for (Flat flat : flatsFromDB) {
             Map<String, Object> saveMap = new HashMap<>();
             coldMeterList = new ArrayList<>();
             hotMeterList = new ArrayList<>();
             String flat_uuid = flat.getUuid().toString();
-            if (pListFromDB.size()>0) {
-                saveMap.put("person", pListFromDB.get(flatI++).personToMap());
-            }
+                try {
+                    saveMap.put("person", pListFromDB.get(flatI++).personToMap());
+                } catch (Exception e) {
+                    Person pers = new Person();
+                    pers.setName("");
+                    pers.setSurname("");
+                    pers.setPatronymic("");
+                    pers.setBuilding("");
+                    pers.setFlat("");
+                    pers.setStreet("");
+                    pers.setsType("");
+                    pers.setPhone("");
+                    saveMap.put("person", pers.personToMap());
+                }
 
             if (metersFromDB.size()>0) {
                 for (Meter meter : metersFromDB) {
@@ -401,9 +419,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                 saveMap.put("cold", coldMeterList);
                 saveMap.put("hot", hotMeterList);
             }
-            if (pListFromDB.size()>0) {
                 savedPage.add(saveMap);
-            }
         }
     }
 
@@ -618,7 +634,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             List<Meter> savedColdList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("cold");
 
             coldMeterList = new ArrayList<>();
-            coldMeterList.addAll(savedColdList);
+            if (savedColdList!=null) {
+                coldMeterList.addAll(savedColdList);
+            }
         } else {
             String flatUuid = "";
             try {
@@ -652,7 +670,9 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         if (savedState != null) {
             List<Meter> savedHotList = (List<Meter>) savedPage.get(radioGroup.getCheckedRadioButtonId()).get("hot");
             hotMeterList = new ArrayList<>();
-            hotMeterList.addAll(savedHotList);
+            if (savedHotList!=null) {
+                hotMeterList.addAll(savedHotList);
+            }
         } else {
             String flatUuid = "";
             try {
@@ -693,9 +713,13 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
             List<Person> pList = new ArrayList<>();
             int rSize = radioGroup.getChildCount();
             for (int i = 0; i < rSize; i++) {
-                list.addAll((List<Meter>) savedPage.get(i).get("cold"));
-                list.addAll((List<Meter>) savedPage.get(i).get("hot"));
-                pList.add(new Person().personFromMap((Map<String, String>) savedPage.get(i).get("person")));
+                try {
+                    list.addAll((List<Meter>) savedPage.get(i).get("cold"));
+                    list.addAll((List<Meter>) savedPage.get(i).get("hot"));
+                    pList.add(new Person().personFromMap((Map<String, String>) savedPage.get(i).get("person")));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             SQLiteDatabase db = new BaseHelper(getContext()).getWritableDatabase();
             db.execSQL("delete from " + MeterTable.NAME);

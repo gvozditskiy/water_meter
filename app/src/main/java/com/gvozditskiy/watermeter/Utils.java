@@ -202,15 +202,15 @@ public class Utils {
             cursorWrapper.close();
         }
 
-        Collections.sort(indList, new Comparator<Indication>() {
-            @Override
-            public int compare(Indication indication, Indication t1) {
-                Integer i1 = indication.getMonth();
-                Integer i2 = t1.getMonth();
-                return i1.compareTo(i2);
-            }
-        });
+        sortByMonth(indList);
 
+        sortByYear(indList);
+
+
+        return indList;
+    }
+
+    public static void sortByYear(List<Indication> indList) {
         Collections.sort(indList, new Comparator<Indication>() {
             @Override
             public int compare(Indication indication, Indication t1) {
@@ -219,9 +219,17 @@ public class Utils {
                 return i1.compareTo(i2);
             }
         });
+    }
 
-
-        return indList;
+    public static void sortByMonth(List<Indication> indList) {
+        Collections.sort(indList, new Comparator<Indication>() {
+            @Override
+            public int compare(Indication indication, Indication t1) {
+                Integer i1 = indication.getMonth();
+                Integer i2 = t1.getMonth();
+                return i1.compareTo(i2);
+            }
+        });
     }
 
     /**

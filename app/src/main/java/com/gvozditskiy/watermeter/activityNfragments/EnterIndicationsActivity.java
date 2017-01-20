@@ -261,7 +261,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
             ft.replace(R.id.content_enter_indications, fragment, TAG_STATFRAG);
             ft.addToBackStack(null);
             ft.commit();
-            fab.hide();
+//            fab.hide();
             mItemId = 1;
         } else if (id == R.id.nav_indications) {
             EneterIndicFragment fragment = new EneterIndicFragment();
@@ -270,7 +270,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
             ft.replace(R.id.content_enter_indications, fragment, TAG_INDFRAG);
             ft.addToBackStack(null);
             ft.commit();
-            fab.show();
+//            fab.show();
             mItemId = 0;
         } else if (id == R.id.nav_info) {
             AboutDialogFragment fragment = new AboutDialogFragment();
