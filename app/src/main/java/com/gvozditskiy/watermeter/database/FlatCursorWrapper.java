@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.database.CursorWrapper;
 
 import com.gvozditskiy.watermeter.Flat;
-import com.gvozditskiy.watermeter.Indication;
 
 import java.util.UUID;
 

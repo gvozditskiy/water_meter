@@ -1,17 +1,16 @@
 package com.gvozditskiy.watermeter.activityNfragments;
 
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.interfaces.OnSaveListener;
-import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
 import com.gvozditskiy.watermeter.interfaces.RegisterSaveInterface;
 
 public class ProfileActivity extends AppCompatActivity implements RegisterSaveInterface {

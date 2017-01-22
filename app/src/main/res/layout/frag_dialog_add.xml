@@ -39,11 +39,12 @@
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:text="@string/frag_enter_ind_current_cold"
+            tools:text="@string/frag_enter_ind_current_cold"
             android:textAlignment="center"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="@+id/frag_enter_ind_cur_coldwater_recycler"
-            app:layout_constraintTop_toBottomOf="@+id/frag_add_flat_spinner" />
+            app:layout_constraintTop_toBottomOf="@+id/frag_add_flat_spinner"
+            app:layout_constraintHorizontal_bias="0.0" />
 
         <TextView
             android:id="@+id/frag_add_current_hot"
@@ -51,10 +52,11 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
-            android:text="@string/frag_enter_ind_current_hot"
+            tools:text="@string/frag_enter_ind_current_hot"
             android:textAlignment="center"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/frag_add_current_cold" />
+            app:layout_constraintTop_toTopOf="@+id/frag_add_current_cold"
+            android:layout_marginTop="0dp" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline1"
@@ -137,22 +139,22 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/frag_add_year_spinner" />
 
-        <Button
-            android:id="@+id/frag_add_btn"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:background="@color/colorAccent"
-            android:text="@string/frag_add_add_flat"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_hotwater_recycler" />
+        <!--<Button-->
+            <!--android:id="@+id/frag_add_btn"-->
+            <!--style="@style/Widget.AppCompat.Button.Colored"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginRight="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="16dp"-->
+            <!--android:background="@color/colorAccent"-->
+            <!--android:text="@string/frag_add_add_flat"-->
+            <!--app:layout_constraintHorizontal_bias="0.0"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintRight_toRightOf="parent"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_cur_hotwater_recycler" />-->
 
     </android.support.constraint.ConstraintLayout>
     </ScrollView>

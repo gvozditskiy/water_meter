@@ -30,7 +30,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginTop="16dp"
                     android:text="@string/frag_enter_ind_flatselect_caption"
-                    android:textSize="@dimen/card_textview_marg" />
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
                 <android.support.v7.widget.AppCompatSpinner
                     android:id="@+id/frag_enter_ind_spinner"
@@ -101,7 +101,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/frag_enter_ind_current_cold"
+                    tools:text="@string/frag_enter_ind_current_cold"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_last" />
 
@@ -124,7 +124,7 @@
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="24dp"
                     android:layout_marginStart="24dp"
-                    android:text="@string/frag_enter_ind_current_hot"
+                    tools:text="@string/frag_enter_ind_current_hot"
                     app:layout_constraintBottom_toTopOf="@+id/frag_enter_ind_last_hotwater_recycler"
                     app:layout_constraintLeft_toLeftOf="@+id/guideline"
                     app:layout_constraintTop_toTopOf="@+id/frag_enter_ind_last_cold"
@@ -201,7 +201,7 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/frag_enter_ind_current_cold"
+                    tools:text="@string/frag_enter_ind_current_cold"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/frag_enter_ind_current" />
 
@@ -221,7 +221,7 @@
                     android:id="@+id/frag_add_current_hot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/frag_enter_ind_current_hot"
+                    tools:text="@string/frag_enter_ind_current_hot"
                     app:layout_constraintTop_toTopOf="@+id/frag_add_current_cold"
                     android:layout_marginLeft="24dp"
                     app:layout_constraintLeft_toLeftOf="@+id/guideline1"
@@ -233,7 +233,7 @@
                     android:layout_height="0dp"
                     android:orientation="vertical"
                     app:layout_constraintGuide_percent="0.5"
-                    tools:layout_editor_absoluteY="190dp"
+                    tools:layout_editor_absoluteY="440dp"
                     tools:layout_editor_absoluteX="192dp" />
 
                 <TextView

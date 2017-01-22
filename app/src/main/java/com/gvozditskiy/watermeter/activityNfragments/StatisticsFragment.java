@@ -5,20 +5,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatSpinner;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.SpinnerAdapter;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
-import com.db.chart.model.Bar;
-import com.db.chart.model.BarSet;
-import com.db.chart.model.LineSet;
-import com.db.chart.view.BarChartView;
-import com.db.chart.view.LineChartView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
@@ -26,9 +19,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.formatter.IFillFormatter;
-import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.gvozditskiy.watermeter.Flat;
 import com.gvozditskiy.watermeter.Indication;
 import com.gvozditskiy.watermeter.Meter;
@@ -36,19 +26,20 @@ import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.gvozditskiy.watermeter.Utils.*;
+import static com.gvozditskiy.watermeter.Utils.sortByMonth;
+import static com.gvozditskiy.watermeter.Utils.sortByYear;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class StatisticsFragment extends Fragment {
     //    AppCompatSpinner spinner;
-    AppCompatSpinner flatSpinner;
+    RadioGroup radioGroup;
+    TextView flatName;
     List<Flat> flats = new ArrayList<>();
     List<Meter> meters = new ArrayList<>();
     List<Integer> deltaCold = new ArrayList<>();
@@ -92,78 +83,74 @@ public class StatisticsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        flatName = (TextView) view.findViewById(R.id.frag_stat_flats_caption);
+        radioGroup = (RadioGroup) view.findViewById(R.id.frag_prof_radiogroup);
         lineChart = (LineChart) view.findViewById(R.id.frag_stat_linechart);
 //        spinner = (AppCompatSpinner) view.findViewById(R.id.frag_stat_spinner);
-        flatSpinner = (AppCompatSpinner) view.findViewById(R.id.frag_stat_spinner_flats);
-//        try {
-//            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//                @Override
-//                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-////                    switch (i) {
-////                        case 0:
-////                            if (Utils.getIndicationsList(0, getContext()).size() > 1) {
-////                                chartView.setVisibility(View.VISIBLE);
-////                                bsrChartView.setVisibility(View.GONE);
-////                                chartView.show();
-////                            }
-////                            break;
-////                        case 1:
-////                            if (Utils.getIndicationsList(0, getContext()).size() > 1) {
-////                                chartView.setVisibility(View.GONE);
-////                                bsrChartView.setVisibility(View.VISIBLE);
-////                                bsrChartView.show();
-////                            }
-////                            break;
-////                    }
-//                    setupChart();
-//                }
-//
-//                @Override
-//                public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//                }
-//            });
-//            if (savedInstanceState != null) {
-//                spinner.setSelection(savedInstanceState.getInt("chart_pos", 0));
-//                flatSpinner.setSelection(savedInstanceState.getInt("flats_pos", 0));
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        List<String> flatNames = new ArrayList<>();
-        for (Flat flat : flats) {
-            flatNames.add(flat.getName());
-        }
-        SpinnerAdapter flatsAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_dropdown_item_1line, flatNames);
-        flatSpinner.setAdapter(flatsAdapter);
-        flatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                //// TODO: 19.01.2017 обновить данные для графиков
-                setupChart();
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        flatSpinner.setSelection(0);
+        setupRadioGroup();
 
         if (savedInstanceState == null) {
             setupChart();
         }
     }
 
+    private void setupRadioGroup() {
+        final List<Flat> flatList = Utils.getFlatList(getContext());
+        int id = 0;
+
+        radioGroup.removeAllViews();
+
+        for (Flat flat : flatList) {
+            RadioButton rBtn = new RadioButton(getContext());
+            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(150, 150);
+            params.setMargins(20, 20, 20, 20);
+            rBtn.setLayoutParams(params);
+            rBtn.setId(id++);
+//                            rBtn.setText(flat.getName());
+            rBtn.setButtonDrawable(null);
+            rBtn.setBackground(getResources().getDrawable(R.drawable.flat_selector));
+            radioGroup.addView(rBtn);
+        }
+
+        try {
+            radioGroup.setOnCheckedChangeListener(null);
+            radioGroup.clearCheck();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                if (i>0) {
+                    flatName.setText(flatList.get(i).getName());
+                } else {
+                    flatName.setText(flatList.get(0).getName());
+                }
+                setupChart();
+            }
+        });
+
+        radioGroup.clearCheck();
+        radioGroup.check(0);
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 //        outState.putInt("chart_pos", spinner.getSelectedItemPosition());
-        outState.putInt("flats_pos", flatSpinner.getSelectedItemPosition());
+        outState.putInt("flats_pos", radioGroup.getCheckedRadioButtonId());
     }
 
     private void setupChart() {
-        String flatId = flats.get(flatSpinner.getSelectedItemPosition()).getUuid().toString();
+        String flatId = "";
+        try {
+            flatId = flats.get(radioGroup.getCheckedRadioButtonId()).getUuid().toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         List<Meter> coldMeters = new ArrayList<>();
         List<Meter> hotMeters = new ArrayList<>();
         List<Indication> coldIndications = new ArrayList<>();
@@ -194,7 +181,10 @@ public class StatisticsFragment extends Fragment {
 
         Set<Integer> years = new HashSet<>();
 
-        for (Indication ind : indications) {
+        for (Indication ind : coldIndications) {
+            years.add(ind.getYear());
+        }
+        for (Indication ind : hotIndications) {
             years.add(ind.getYear());
         }
 
@@ -202,7 +192,12 @@ public class StatisticsFragment extends Fragment {
 
         for (int year : years) {
             months.clear();
-            for (Indication ind : indications) {
+            for (Indication ind : coldIndications) {
+                if (ind.getYear() == year) {
+                    months.add(ind.getMonth());
+                }
+            }
+            for (Indication ind : hotIndications) {
                 if (ind.getYear() == year) {
                     months.add(ind.getMonth());
                 }
@@ -254,7 +249,7 @@ public class StatisticsFragment extends Fragment {
         List<Entry> hotLineSet = new ArrayList<>();
         List<Entry> sumLineSet = new ArrayList<>();
 
-        if (coldIndications.size() > 0) {
+        if (newColdIndications.size() > 1) {
 
             for (int i = 1; i < newColdIndications.size(); i++) {
                 deltaCold.add(Math.abs(newColdIndications.get(i).getValue() - newColdIndications.get(i - 1).getValue()));
@@ -278,10 +273,15 @@ public class StatisticsFragment extends Fragment {
 
             setupChartStyle(coldLineSet, hotLineSet, sumLineSet);
         } else {
-            lineChart.clear();
-            lineChart.setDescription(null);
-            lineChart.notifyDataSetChanged();
-            lineChart.invalidate(); // refresh
+            try {
+                lineChart.clear();
+                lineChart.setDescription(null);
+                lineChart.notifyDataSetChanged();
+                lineChart.invalidate(); // refresh
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
 
@@ -317,16 +317,35 @@ public class StatisticsFragment extends Fragment {
         lineData.addDataSet(hotdataSet);
         lineData.addDataSet(sumdataSet);
 
-        lineChart.setData(lineData);
+        try {
+            lineChart.setData(lineData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setValueFormatter(new MyXAxisValueFormatter(row.toArray(new String[row.size()])));
-        xAxis.setGranularity(1f);
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawAxisLine(true);
-        lineChart.setDescription(null);
-        lineChart.notifyDataSetChanged();
-        lineChart.invalidate(); // refresh
+
+        try {
+            XAxis xAxis = lineChart.getXAxis();
+            xAxis.setValueFormatter(new MyXAxisValueFormatter(row.toArray(new String[row.size()])));
+            xAxis.setGranularity(1f);
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setDrawAxisLine(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            lineChart.setDescription(null);
+
+            lineChart.notifyDataSetChanged();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            lineChart.invalidate(); // refresh
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public class MyXAxisValueFormatter implements IAxisValueFormatter {
@@ -340,7 +359,11 @@ public class StatisticsFragment extends Fragment {
 
         @Override
         public String getFormattedValue(float value, AxisBase axis) {
-            return mValues[(int) value];
+            if (mValues != null & value < mValues.length && value > 0) {
+                return mValues[(int) value];
+            } else {
+                return "";
+            }
         }
 
     }

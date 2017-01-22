@@ -2,9 +2,11 @@ package com.gvozditskiy.watermeter.activityNfragments;
 
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatSpinner;
@@ -14,8 +16,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gvozditskiy.watermeter.Flat;
@@ -28,6 +30,7 @@ import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.database.BaseHelper;
 import com.gvozditskiy.watermeter.database.DbSchema;
+import com.gvozditskiy.watermeter.interfaces.OnDialogClosed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,17 +55,29 @@ public class AddDialogFragment extends DialogFragment {
     List<Flat> flatList;
     AbstractCurrentAdapter coldCurrentAdapter;
     HotCurrentAdapter hotCurrentAdapter;
+    OnDialogClosed onDialogClosed;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        this.setCancelable(false);
+
+    }
+
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.frag_dialog_add, null, false);
-        Spinner spinYear = (Spinner) v.findViewById(R.id.frag_add_year_spinner);
+        final Spinner spinYear = (Spinner) v.findViewById(R.id.frag_add_year_spinner);
         final Spinner spinMonth = (Spinner) v.findViewById(R.id.frag_add_month_spinner);
         RecyclerView coldRcycler = (RecyclerView) v.findViewById(R.id.frag_enter_ind_cur_coldwater_recycler);
         RecyclerView hotRcycler = (RecyclerView) v.findViewById(R.id.frag_enter_ind_cur_hotwater_recycler);
+        final TextView coldTv = (TextView)v.findViewById(R.id.frag_add_current_cold);
+        final TextView hotTv = (TextView)v.findViewById(R.id.frag_add_current_hot);
+
         AppCompatSpinner flatSpinner = (AppCompatSpinner) v.findViewById(R.id.frag_add_flat_spinner);
-        final Button addBtn = (Button) v.findViewById(R.id.frag_add_btn);
+//        final Button addBtn = (Button) v.findViewById(R.id.frag_add_btn);
 
         coldCurrentAdapter = new ColdCurrentAdapter(getContext(), false);
         hotCurrentAdapter = new HotCurrentAdapter(getContext(), false);
@@ -77,118 +92,176 @@ public class AddDialogFragment extends DialogFragment {
         final List<Indication> indList = new ArrayList<>();
         List<String> flatNameList = new ArrayList<>();
         flatList = Utils.getFlatList(getContext().getApplicationContext());
-        for (Flat flat : flatList) {
-            flatNameList.add(flat.getName());
-
-        }
-
-        if (flatList.size()<=1) {
-            addBtn.setText(getResources().getString(R.string.frag_add_add));
+        if (flatList.size()==0) {
+            Toast.makeText(getContext().getApplicationContext(), getString(R.string.frag_add_add_message),
+                    Toast.LENGTH_LONG).show();
+            dismiss();
         } else {
-            addBtn.setText(getResources().getString(R.string.frag_add_add_flat));
-        }
+            for (Flat flat : flatList) {
+                flatNameList.add(flat.getName());
 
-        indList.clear();
-        indList.addAll(Utils.getIndicationsList(0, getContext()));
+            }
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getContext(),
-                R.layout.flat_spinner_view, R.id.flat_spinner_tv, flatNameList);
-        flatSpinner.setAdapter(spinnerAdapter);
-        flatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Flat flat = flatList.get(i);
-                String flatUUID = flat.getUuid().toString();
-                coldMeterList = new ArrayList<Meter>();
-                hotMeterList = new ArrayList<Meter>();
-                for (Meter meter : Utils.getMeterLsit(getContext().getApplicationContext())) {
-                    if (meter.getFlatUUID().equals(flatUUID)) {
-                        if (meter.getType().equals(Meter.TYPE_COLD)) {
-                            coldMeterList.add(meter);
-                        } else if (meter.getType().equals(Meter.TYPE_HOT)) {
-                            hotMeterList.add(meter);
+//            if (flatList.size() <= 1) {
+//                addBtn.setText(getResources().getString(R.string.frag_add_add));
+//            } else {
+//                addBtn.setText(getResources().getString(R.string.frag_add_add_flat));
+//            }
+
+            indList.clear();
+            indList.addAll(Utils.getIndicationsList(0, getContext()));
+
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getContext(),
+                    R.layout.flat_spinner_view, R.id.flat_spinner_tv, flatNameList);
+            flatSpinner.setAdapter(spinnerAdapter);
+            flatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    Flat flat = flatList.get(i);
+                    String flatUUID = flat.getUuid().toString();
+                    coldMeterList = new ArrayList<Meter>();
+                    hotMeterList = new ArrayList<Meter>();
+                    for (Meter meter : Utils.getMeterLsit(getContext().getApplicationContext())) {
+                        if (meter.getFlatUUID().equals(flatUUID)) {
+                            if (meter.getType().equals(Meter.TYPE_COLD)) {
+                                coldMeterList.add(meter);
+                            } else if (meter.getType().equals(Meter.TYPE_HOT)) {
+                                hotMeterList.add(meter);
+                            }
                         }
                     }
+                    listForColdRecycler.clear();
+                    listForHotRecycler.clear();
+
+
+                    try {
+                        int pos = spinMonth.getSelectedItemPosition();
+                        setupColdIndications(pos, indList);
+                        setupHotIndications(pos, indList);
+                    } catch (Exception e) {
+                        setupColdIndications();
+                        setupHotIndications();
+                    }
+                    String coldMeter = "Счетчик";
+                    String hotMeter = "Счетчик";
+                    if (coldMeterList.size() > 1) {
+                        coldMeter = "Счетчики";
+                    }
+                    if (hotMeterList.size() > 1) {
+                        hotMeter = "Счетчики";
+                    }
+
+                    coldTv.setText(String.format(getString(R.string.frag_enter_ind_current_cold), coldMeter));
+                    hotTv.setText(String.format(getString(R.string.frag_enter_ind_current_cold), coldMeter));
                 }
-                listForColdRecycler.clear();
-                listForHotRecycler.clear();
 
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
 
-
-                try {
-                    int pos = spinMonth.getSelectedItemPosition();
-                    setupColdIndications(pos, indList);
-                    setupHotIndications(pos, indList);
-                } catch (Exception e) {
-                    setupColdIndications();
-                    setupHotIndications();
                 }
+            });
+            flatSpinner.setSelection(0);
+
+
+            Date date = new Date();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+
+            setSelectedYear(calendar.get(Calendar.YEAR));
+
+
+            for (int i = 0; i < 10; i++) {
+                yearsList.add(calendar.get(Calendar.YEAR) - i);
             }
+            ArrayAdapter<Integer> yearAdapter = new ArrayAdapter<Integer>(getContext(), android.R.layout.simple_list_item_1, yearsList);
+            spinYear.setAdapter(yearAdapter);
+            spinYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    ArrayAdapter<String> monthAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, getMonth(yearsList.get(i)));
+                    setSelectedYear(yearsList.get(i));
+                    spinMonth.setAdapter(monthAdapter);
+                    spinMonth.setSelection(0, true);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
+                    int mSize = getMonth(selectedYear).size();
+//                    if (mSize == 0) {
+//                        addBtn.setEnabled(false);
+//
+//                    } else {
+//                        addBtn.setEnabled(true);
+//                    }
 
-            }
-        });
-        flatSpinner.setSelection(0);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
 
 
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+            spinYear.setSelection(0, true);
 
-        setSelectedYear(calendar.get(Calendar.YEAR));
+            spinMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    setupColdIndications(i, indList);
 
+                    setupHotIndications(i, indList);
+                }
 
-        for (int i = 0; i < 10; i++) {
-            yearsList.add(calendar.get(Calendar.YEAR) - i);
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+
+//            addBtnSetup(spinMonth, addBtn, indList);
         }
-        ArrayAdapter<Integer> yearAdapter = new ArrayAdapter<Integer>(getContext(), android.R.layout.simple_list_item_1, yearsList);
-        spinYear.setAdapter(yearAdapter);
-        spinYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                ArrayAdapter<String> monthAdapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, getMonth(yearsList.get(i)));
-                setSelectedYear(yearsList.get(i));
-                spinMonth.setAdapter(monthAdapter);
-                spinMonth.setSelection(0, true);
+        dialog = new AlertDialog.Builder(getContext())
+                .setView(v)
+                .setPositiveButton("Закрыть", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (onDialogClosed!=null) {
+                            onDialogClosed.onClose();
+                        }
+                        dismiss();
+                    }
+                })
+                .setNeutralButton("Добавить показания", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
 
-                int mSize = getMonth(selectedYear).size();
-                if (mSize==0) {
-                    addBtn.setEnabled(false);
-
-                } else {
-                    addBtn.setEnabled(true);
-                }
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-
-        spinYear.setSelection(0, true);
-
-        spinMonth.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setupColdIndications(i, indList);
-
-                setupHotIndications(i, indList);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        addBtn.setOnClickListener(new View.OnClickListener() {
+                    }
+                })
+                .create();
+        dialog.show();
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if (getMonth(yearsList.get(spinYear.getSelectedItemPosition())).size()>0) {
+                    addBtnSetup(spinMonth, indList);
+                } else {
+                    Toast.makeText(getContext(), "Невозможно добавить показания", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        return dialog;
+    }
+
+    public void setOnDialogCloseListener(OnDialogClosed onDialogClosed) {
+        this.onDialogClosed = onDialogClosed;
+    }
+
+    private void addBtnSetup(final Spinner spinMonth /*, Button addBtn*/, final List<Indication> indications) {
+//        addBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
                 SQLiteDatabase mDatabase = new BaseHelper(getContext()).getWritableDatabase();
                 List<Indication> coldIndList = coldCurrentAdapter.getIndicationsList();
                 List<Indication> hotIndList = hotCurrentAdapter.getIndicationsList();
@@ -225,17 +298,12 @@ public class AddDialogFragment extends DialogFragment {
                 }
 
                 Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
-            }
-        });
 
-        dialog = new AlertDialog.Builder(getContext())
-                .setView(v)
-                .create();
-        dialog.show();
-        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-        dialog.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        return dialog;
+                //загрузить обновленные данные
+                indications.clear();
+                indications.addAll(Utils.getIndicationsList(0, getContext()));
+//            }
+//        });
     }
 
     private void setupHotIndications(int i, List<Indication> indList) {

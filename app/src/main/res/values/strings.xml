@@ -17,8 +17,8 @@
     <!--//////////////////////frag_enter_indic//////////////-->
     <string name="frag_enter_ind_current">Показания за текущий период</string>
     <string name="frag_enter_ind_last">Показания за предыдущий период</string>
-    <string name="frag_enter_ind_current_cold">Счетчик холодной воды</string>
-    <string name="frag_enter_ind_current_hot">Счетчик горячей воды</string>
+    <string name="frag_enter_ind_current_cold">%s холодной воды</string>
+    <string name="frag_enter_ind_current_hot">%s горячей воды</string>
     <string name="frag_enter_ind_sendBtn_caption">Отправить показания</string>
     <string name="frag_enter_ind_summary">Суммарный расход за текущий период %d м³</string>
     <string name="frag_enter_ind_delta">+%d м³</string>
@@ -72,6 +72,17 @@
     <string name="frag_add_flat">Квартира</string>
     <string name="frag_add_add">Добавить показания</string>
     <string name="frag_add_add_flat">Добавить показания для выбранной квартиры</string>
+    <string name="frag_add_add_message">Пожалуйста, добавьте информацию о плательщике!</string>
+
+    <!--////////welcome_screens//////////-->
+    <string name="welcom_1_title">Простота и удобство</string>
+    <string name="welcom_1_text">Добавляйте неограниченное количество квартир и счетчиков</string>
+
+    <string name="welcom_2_title">Статистика</string>
+    <string name="welcom_2_text">Ведите статистику расхода холодной и горячей воды</string>
+
+    <string name="welcom_3_title">Учёт</string>
+    <string name="welcom_3_text">Отправляйте показания счетчиков в Ваш РСЦ</string>
 
     <string-array name="streets">
         <item>Улица</item>

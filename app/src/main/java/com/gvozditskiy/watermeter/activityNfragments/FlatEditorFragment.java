@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -22,7 +21,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.gvozditskiy.watermeter.Flat;
@@ -48,7 +47,7 @@ public class FlatEditorFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.fragment_dialog_editor_flat, null, false);
         RecyclerView recycler = (RecyclerView) v.findViewById(R.id.frag_dialog_flat_recycler);
-        Button addBtn = (Button) v.findViewById(R.id.frag_dialog_flat_btn);
+        ImageButton addBtn = (ImageButton) v.findViewById(R.id.frag_dialog_flat_btn);
         recycler.setLayoutManager(new LinearLayoutManager(getContext()));
         imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         ArrayList<Flat> flatsFromDb = (ArrayList<Flat>) Utils.getFlatList(getContext());
@@ -65,13 +64,14 @@ public class FlatEditorFragment extends DialogFragment {
             @Override
             public void onClick(int i) {
                 flatList.remove(i);
-                adapter.notifyDataSetChanged();
+                adapter.notifyItemRemoved(i);
+                adapter.notifyItemRangeChanged(i, flatList.size());
             }
         });
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                flatList.add(new Flat(""));
+                flatList.add(new Flat("Моя квартира"+flatList.size()));
                 adapter.notifyDataSetChanged();
             }
         });
@@ -150,7 +150,7 @@ public class FlatEditorFragment extends DialogFragment {
                 view = inflater.inflate(R.layout.flat_layout, viewGroup, false);
             }
             AppCompatEditText name = (AppCompatEditText) view.findViewById(R.id.flat_lt_name);
-            Button btn = (Button) view.findViewById(R.id.flat_lt_btn);
+            ImageButton btn = (ImageButton) view.findViewById(R.id.flat_lt_btn);
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -221,7 +221,11 @@ public class FlatEditorFragment extends DialogFragment {
 
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    flats.get(pos).setName(charSequence.toString());
+                    try {
+                        flats.get(pos).setName(charSequence.toString());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 @Override
@@ -239,12 +243,12 @@ public class FlatEditorFragment extends DialogFragment {
 
     private static class VH extends RecyclerView.ViewHolder {
         AppCompatEditText name;
-        Button btn;
+        ImageButton btn;
 
         public VH(View view) {
             super(view);
             name = (AppCompatEditText) view.findViewById(R.id.flat_lt_name);
-            btn = (Button) view.findViewById(R.id.flat_lt_btn);
+            btn = (ImageButton) view.findViewById(R.id.flat_lt_btn);
         }
     }
 

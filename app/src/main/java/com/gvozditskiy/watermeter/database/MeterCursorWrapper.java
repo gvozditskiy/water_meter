@@ -3,13 +3,11 @@ package com.gvozditskiy.watermeter.database;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.gvozditskiy.watermeter.Indication;
 import com.gvozditskiy.watermeter.Meter;
 
 import java.util.UUID;
 
-import static com.gvozditskiy.watermeter.database.DbSchema.*;
-import static com.gvozditskiy.watermeter.database.DbSchema.IndTable;
+import static com.gvozditskiy.watermeter.database.DbSchema.MeterTable;
 
 /**
  * Created by Alexey on 24.12.2016.

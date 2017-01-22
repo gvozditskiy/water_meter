@@ -3,10 +3,7 @@ package com.gvozditskiy.watermeter.database;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 
-import com.gvozditskiy.watermeter.Indication;
 import com.gvozditskiy.watermeter.Person;
-
-import static com.gvozditskiy.watermeter.database.DbSchema.IndTable;
 
 /**
  * Created by Alexey on 24.12.2016.

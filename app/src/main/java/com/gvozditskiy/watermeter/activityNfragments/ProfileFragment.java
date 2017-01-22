@@ -173,6 +173,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                     coldMeterList.get(0).setName("ХВ1");
                     coldAdapter.notifyDataSetChanged();
                 }
+                coldRecycler.scrollToPosition(coldMeterList.size()-1);
             }
         });
 
@@ -188,6 +189,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
                     hotMeterList.get(0).setName("ГВ1");
                     hotAdapter.notifyDataSetChanged();
                 }
+                hotRecycler.scrollToPosition(hotMeterList.size()-1);
             }
         });
 

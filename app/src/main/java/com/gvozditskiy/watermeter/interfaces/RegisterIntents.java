@@ -1,7 +1,6 @@
 package com.gvozditskiy.watermeter.interfaces;
 
 import android.app.PendingIntent;
-import android.content.Intent;
 
 /**
  * Created by Alexey on 26.12.2016.

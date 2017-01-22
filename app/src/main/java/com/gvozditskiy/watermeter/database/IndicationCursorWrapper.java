@@ -7,7 +7,7 @@ import com.gvozditskiy.watermeter.Indication;
 
 import java.util.UUID;
 
-import static com.gvozditskiy.watermeter.database.DbSchema.*;
+import static com.gvozditskiy.watermeter.database.DbSchema.IndTable;
 
 /**
  * Created by Alexey on 24.12.2016.

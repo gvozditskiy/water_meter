@@ -21,10 +21,12 @@
         android:inputType="text"
         style="@style/Widget.AppCompat.AutoCompleteTextView"
         android:maxLines="1" />
-    <Button
+    <ImageButton
         android:id="@+id/flat_lt_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
+        android:src="@drawable/ic_del"
+        android:background="@color/transparent"
         android:text="Удалить"/>
 </LinearLayout>
