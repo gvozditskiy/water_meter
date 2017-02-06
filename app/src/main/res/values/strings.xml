@@ -86,6 +86,8 @@
     <string name="welcom_3_title">Учёт</string>
     <string name="welcom_3_text">Отправляйте показания счетчиков в Ваш РСЦ</string>
 
+    <string name="version">Версия 0.1.2</string>
+
     <string-array name="streets">
         <item>Улица</item>
         <item>Проспект</item>
