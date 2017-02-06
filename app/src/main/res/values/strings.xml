@@ -29,6 +29,8 @@
     <string name="frag_enter_ind_message_warn">Будет отправлено СМС следующего содержания: \n
     %s</string>
 
+    <string name="act_enter_alert">Пожалуйста, создайте профиль плательщика</string>
+
     <!--///////////////frag_profile//////////////////-->
     <string name="frag_prof_name_hint">Имя</string>
     <string name="frag_prof_secname_hint">Фамилия</string>

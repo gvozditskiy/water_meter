@@ -266,40 +266,44 @@ public class AddDialogFragment extends DialogFragment {
                 List<Indication> coldIndList = coldCurrentAdapter.getIndicationsList();
                 List<Indication> hotIndList = hotCurrentAdapter.getIndicationsList();
                 coldIndList.size();
-                for (int k = 0; k < coldIndList.size(); k++) {
-                    Indication indication = findIndication(selectedYear,
-                            spinMonth.getSelectedItemPosition(),
-                            coldMeterList.get(k).getUuid().toString());
-                    if (indication!=null) {
-                        indication.setValue(coldIndList.get(k).getValue());
-                        mDatabase.update(DbSchema.IndTable.NAME, getContentValues(indication),
-                                DbSchema.IndTable.Cols.UUID + " = ?",
-                                new String[] {indication.getUuid().toString()});
-                    } else {
-                        coldIndList.get(k).setYear(selectedYear);
-                        coldIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
-                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(coldIndList.get(k)));
-                    }
+        if (coldIndList.size()+hotIndList.size()>0) {
+            for (int k = 0; k < coldIndList.size(); k++) {
+                Indication indication = findIndication(selectedYear,
+                        spinMonth.getSelectedItemPosition(),
+                        coldMeterList.get(k).getUuid().toString());
+                if (indication!=null) {
+                    indication.setValue(coldIndList.get(k).getValue());
+                    mDatabase.update(DbSchema.IndTable.NAME, getContentValues(indication),
+                            DbSchema.IndTable.Cols.UUID + " = ?",
+                            new String[] {indication.getUuid().toString()});
+                } else {
+                    coldIndList.get(k).setYear(selectedYear);
+                    coldIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
+                    mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(coldIndList.get(k)));
                 }
-                for (int k = 0; k < hotIndList.size(); k++) {
-                    Indication indication = findIndication(selectedYear,
-                            spinMonth.getSelectedItemPosition(),
-                            hotMeterList.get(k).getUuid().toString());
-                    if (indication!=null) {
-                        indication.setValue(hotIndList.get(k).getValue());
-                        mDatabase.update(DbSchema.IndTable.NAME, getContentValues(indication),
-                                DbSchema.IndTable.Cols.UUID + " = ?",
-                                new String[] {indication.getUuid().toString()});
-                    } else {
-                        hotIndList.get(k).setYear(selectedYear);
-                        hotIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
-                        mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(hotIndList.get(k)));
-                    }
+            }
+            for (int k = 0; k < hotIndList.size(); k++) {
+                Indication indication = findIndication(selectedYear,
+                        spinMonth.getSelectedItemPosition(),
+                        hotMeterList.get(k).getUuid().toString());
+                if (indication!=null) {
+                    indication.setValue(hotIndList.get(k).getValue());
+                    mDatabase.update(DbSchema.IndTable.NAME, getContentValues(indication),
+                            DbSchema.IndTable.Cols.UUID + " = ?",
+                            new String[] {indication.getUuid().toString()});
+                } else {
+                    hotIndList.get(k).setYear(selectedYear);
+                    hotIndList.get(k).setMonth(spinMonth.getSelectedItemPosition());
+                    mDatabase.insert(DbSchema.IndTable.NAME, null, getContentValues(hotIndList.get(k)));
                 }
+            }
 
-                Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Данные добавлены", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "Невозможно добавить показания", Toast.LENGTH_SHORT).show();
+        }
 
-                //загрузить обновленные данные
+        //загрузить обновленные данные
                 indications.clear();
                 indications.addAll(Utils.getIndicationsList(0, getContext()));
 //            }

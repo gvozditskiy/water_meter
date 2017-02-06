@@ -259,6 +259,20 @@ public class EneterIndicFragment extends Fragment implements SendErrorCallback {
 //        initInd();
 
         registerInterface.onRegisterInterface(this);
+
+        if (Utils.getFlatList(getContext()).size()==0) {
+            new AlertDialog.Builder(getContext()).setMessage(getString(R.string.act_enter_alert))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(getContext(), ProfileActivity.class);
+                            startActivity(intent);
+                        }
+                    })
+                    .show();
+
+        }
     }
 
     private void setupFlatIndications(@Nullable Bundle savedInstanceState) {

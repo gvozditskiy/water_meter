@@ -1,6 +1,7 @@
 package com.gvozditskiy.watermeter.activityNfragments;
 
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -13,6 +14,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,6 +25,7 @@ import android.view.MenuItem;
 import com.gvozditskiy.watermeter.R;
 import com.gvozditskiy.watermeter.SmsDeliveredStatus;
 import com.gvozditskiy.watermeter.SmsStatusReciever;
+import com.gvozditskiy.watermeter.Utils;
 import com.gvozditskiy.watermeter.interfaces.RegisterIntents;
 import com.gvozditskiy.watermeter.interfaces.RegisterInterface;
 import com.gvozditskiy.watermeter.interfaces.SendErrorCallback;
@@ -47,6 +51,7 @@ public class EnterIndicationsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         SharedPreferences sp = getSharedPreferences("welcome",MODE_PRIVATE);
         int watches = sp.getInt("watches",0);
         if (watches!=1) {

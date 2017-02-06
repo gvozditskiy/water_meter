@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.gvozditskiy.watermeter.Utils.dpToPx;
 import static com.gvozditskiy.watermeter.Utils.sortByMonth;
 import static com.gvozditskiy.watermeter.Utils.sortByYear;
 
@@ -103,7 +104,7 @@ public class StatisticsFragment extends Fragment {
 
         for (Flat flat : flatList) {
             RadioButton rBtn = new RadioButton(getContext());
-            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(150, 150);
+            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(dpToPx(getContext(), 48), dpToPx(getContext(), 48));
             params.setMargins(20, 20, 20, 20);
             rBtn.setLayoutParams(params);
             rBtn.setId(id++);

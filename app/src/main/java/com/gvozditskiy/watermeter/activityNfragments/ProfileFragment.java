@@ -18,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.gvozditskiy.watermeter.Utils.dpToPx;
 import static com.gvozditskiy.watermeter.database.DbSchema.FlatsTable;
 import static com.gvozditskiy.watermeter.database.DbSchema.MeterTable;
 import static com.gvozditskiy.watermeter.database.DbSchema.UserTable;
@@ -285,7 +287,7 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         
         for (Flat flat : flatList) {
             RadioButton rBtn = new RadioButton(getContext());
-            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(150, 150);
+            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(dpToPx(getContext(),48), dpToPx(getContext(),48));
             params.setMargins(20, 20, 20, 20);
             rBtn.setLayoutParams(params);
             rBtn.setId(id++);
@@ -752,4 +754,6 @@ public class ProfileFragment extends Fragment implements OnSaveListener {
         }
 
     }
+
+
 }
