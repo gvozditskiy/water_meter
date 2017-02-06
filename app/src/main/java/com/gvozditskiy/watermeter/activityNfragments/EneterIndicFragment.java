@@ -7,6 +7,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -67,6 +68,7 @@ import static com.gvozditskiy.watermeter.activityNfragments.EnterIndicationsActi
  */
 public class EneterIndicFragment extends Fragment implements SendErrorCallback {
     private static final String TAG_ADDFRAG = "AddDialogFragment";
+    private static final String EXTRA_ALERT = "alert_shown";
     RecyclerView lastColdRecycler;
     RecyclerView curColdRecycler;
     RecyclerView lastHotRecycler;
@@ -113,6 +115,8 @@ public class EneterIndicFragment extends Fragment implements SendErrorCallback {
     Bundle bundle;
     boolean hasPermission;
 
+    boolean isAlertShown;
+
 
     public EneterIndicFragment() {
         // Required empty public constructor
@@ -134,6 +138,10 @@ public class EneterIndicFragment extends Fragment implements SendErrorCallback {
 
         setHasOptionsMenu(true);
         getActivity().setTitle(getString(R.string.app_name));
+
+        if (savedInstanceState!=null) {
+            isAlertShown = savedInstanceState.getBoolean(EXTRA_ALERT);
+        }
 
     }
 
@@ -259,8 +267,9 @@ public class EneterIndicFragment extends Fragment implements SendErrorCallback {
 //        initInd();
 
         registerInterface.onRegisterInterface(this);
-
-        if (Utils.getFlatList(getContext()).size()==0) {
+        SharedPreferences sp = getActivity().getSharedPreferences("welcome",getContext().MODE_PRIVATE);
+        int watches = sp.getInt("watches",0);
+        if (watches>0 && !isAlertShown && Utils.getFlatList(getContext()).size()==0) {
             new AlertDialog.Builder(getContext()).setMessage(getString(R.string.act_enter_alert))
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -271,6 +280,7 @@ public class EneterIndicFragment extends Fragment implements SendErrorCallback {
                         }
                     })
                     .show();
+            isAlertShown = true;
 
         }
     }
@@ -503,6 +513,7 @@ public class EneterIndicFragment extends Fragment implements SendErrorCallback {
         outState.putSerializable("coldInd", (Serializable) coldCurrentAdapter.getIndicationsList());
         outState.putSerializable("hotInd", (Serializable) hotCurrentAdapter.getIndicationsList());
         outState.putInt("flat", spinner.getSelectedItemPosition());
+        outState.putBoolean(EXTRA_ALERT, isAlertShown);
     }
 
     /**

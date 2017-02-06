@@ -127,8 +127,10 @@ public class StatisticsFragment extends Fragment {
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if (i>0) {
                     flatName.setText(flatList.get(i).getName());
-                } else {
+                } else if (flatList.size()!=0) {
                     flatName.setText(flatList.get(0).getName());
+                } else {
+                    flatName.setText("");
                 }
                 setupChart();
             }
